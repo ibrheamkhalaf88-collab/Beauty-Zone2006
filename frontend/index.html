@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beauty Zone · بيوتي زون — جمالك، بلمسة فرق</title>
+  <meta name="description" content="متجر Beauty Zone للكوزمتكس والعناية — مكياج، عناية بالبشرة، فيتامينات، ومنتجات العناية الشخصية. جمالك، بلمسة فرق." />
+
+  <!-- PWA & MOBILE SUPPORT -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Beauty Zone">
+  <link rel="apple-touch-icon" href="assets/bz_icon_192.png">
+  
+  <!-- CRITICAL: Prevent flash before CSS loads -->
+  <style>
+    html, body { background: #FAF7F4; margin: 0; }
+    #space-intro-container { position: fixed; inset: 0; z-index: 999999; background: #0a050f; }
+  </style>
+
+  <!-- MANIFEST FOR PWA -->
+  <link rel="manifest" href="pwa-manifest.json" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- GSAP + ScrollTrigger + MotionPath (الأداء) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+  <!-- CountUp.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js"></script>
+  <!-- Swiper (للسلايدر) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  
+  <link rel="stylesheet" href="css/glow.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+
+  <!-- SERVICE WORKER REGISTRATION + PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registered', reg.scope))
+          .catch(err => console.warn('SW failed:', err));
+      });
+    }
+    let _pwaPrompt = null;
+    const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    const _isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    function _showFloatingBtn(show) {
+      const btn = document.getElementById('pwa-float-btn');
+      if (btn) btn.style.display = show ? 'flex' : 'none';
+    }
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      _pwaPrompt = e;
+      document.querySelectorAll('.pwa-install-nav-btn, #pwa-install-container').forEach(el => el.style.display = '');
+      if (!_isStandalone) _showFloatingBtn(true);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      _pwaPrompt = null;
+      document.querySelectorAll('.pwa-install-nav-btn, #pwa-install-container, #pwa-float-btn').forEach(el => el.style.display = 'none');
+      const msg = document.getElementById('pwa-installed-msg');
+      if (msg) msg.style.display = 'block';
+      _showFloatingBtn(false);
+    });
+
+    function triggerPwaInstall() {
+      if (_pwaPrompt) { _pwaPrompt.prompt(); _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; }); }
+    }
+
+    // iOS: show floating button + iOS guide if not standalone
+    if (_isIOS && !_isStandalone) {
+      document.addEventListener('DOMContentLoaded', () => {
+        _showFloatingBtn(true);
+        const iosGuide = document.getElementById('pwa-ios-guide');
+        if (iosGuide) iosGuide.style.display = '';
+      });
+    }
+
+    // Already installed? hide everything
+    if (_isStandalone) {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.pwa-install-nav-btn, #pwa-install-container, #pwa-float-btn').forEach(el => el.style.display = 'none');
+        const msg = document.getElementById('pwa-installed-msg');
+        if (msg) msg.style.display = 'block';
+      });
+    }
+  </script>
+</head>
+<body class="glow-body">
+
+  <!-- ACCOUNT & SETTINGS MODAL -->
+  <div id="login-modal" class="modal-overlay hidden" style="display:none">
+    <div class="login-modal-box">
+      <button class="modal-close" id="login-modal-close">✕</button>
+      <div class="login-modal-header">
+        <div class="login-modal-logo">💜</div>
+        <p class="login-modal-brand">Beauty Zone</p>
+      </div>
+      <div class="login-tabs">
+        <button class="login-tab active" data-form="login">تسجيل الدخول</button>
+        <button class="login-tab" data-form="register">إنشاء حساب</button>
+      </div>
+      <div id="form-login" class="login-form active">
+        <input type="tel" id="login-phone" placeholder="📱 رقم الهاتف" class="login-input"/>
+        <p class="login-divider"><span>أو عبر البريد</span></p>
+        <input type="email" id="login-email" placeholder="📧 البريد الإلكتروني" class="login-input"/>
+        <input type="password" id="login-pass" placeholder="🔒 كلمة المرور" class="login-input"/>
+        <button class="btn btn-primary btn-full" id="btn-do-login">دخول ✨</button>
+      </div>
+      <div id="form-register" class="login-form">
+        <input type="text" id="reg-name" placeholder="👤 الاسم الكامل" class="login-input"/>
+        <input type="tel" id="reg-phone" placeholder="📱 رقم الهاتف" class="login-input"/>
+        <input type="email" id="reg-email" placeholder="📧 البريد الإلكتروني" class="login-input"/>
+        <select id="reg-location" class="login-input">
+          <option value="">📍 اختاري موقعك</option>
+          <option value="غزة">غزة</option>
+          <option value="جنوب">جنوب</option>
+          <option value="نصيرات">نصيرات</option>
+          <option value="دير البلح">دير البلح</option>
+          <option value="رفح">رفح</option>
+          <option value="خانيونس">خانيونس</option>
+        </select>
+        <input type="password" id="reg-pass" placeholder="🔒 كلمة المرور" class="login-input"/>
+        <button class="btn btn-primary btn-full" id="btn-do-register">أنشئ حسابك 🌸</button>
+      </div>
+      <div class="app-settings-section">
+        <h4>إعدادات ملفك الشخصي 👤</h4>
+        <div class="profile-preview" id="user-profile-info" style="display:none">
+           <p>مرحباً <strong id="logged-user-name"></strong></p>
+           <button class="btn btn-primary" id="btn-my-orders" style="margin:8px 0;font-size:0.9rem">📦 طلباتي</button>
+           <button class="btn btn-ghost" id="btn-logout" style="font-size:0.8rem">تسجيل الخروج</button>
+        </div>
+        <div id="pwa-section" style="margin-top:22px">
+          <div id="pwa-installed-msg" style="display:none;background:#f0fff0;border:1.5px solid #4caf50;border-radius:14px;padding:14px;text-align:center;">
+            <p style="font-size:1.4rem;margin-bottom:4px">📱✅</p>
+            <p style="color:#2e7d32;font-weight:700;margin:0">التطبيق مثبّت على هاتفك!</p>
+          </div>
+          <div id="pwa-install-container" style="display:none">
+            <div style="background:linear-gradient(135deg,#7B2D8B,#3d1050);border-radius:16px;padding:18px;text-align:center;color:#fff">
+              <p style="font-size:1.5rem;margin-bottom:6px">📲</p>
+              <p style="font-weight:700;margin-bottom:4px">ثبّتي التطبيق على هاتفك</p>
+              <p style="font-size:.82rem;opacity:.85;margin-bottom:14px">وصول سريع من شاشتك الرئيسية</p>
+              <button class="btn" id="pwa-install-btn" style="background:#fff;color:#7B2D8B;font-weight:700;width:100%;border:none">
+                📥 تثبيت Beauty Zone
+              </button>
+            </div>
+          </div>
+          <div id="pwa-ios-guide" style="display:none">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:18px;color:#fff">
+              <p style="font-weight:700;font-size:1rem;margin-bottom:12px;text-align:center">🍎 تثبيت على iPhone / iPad</p>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:10px">
+                  <span style="font-size:1.6rem">1️⃣</span>
+                  <span style="font-size:.88rem">افتحي الموقع في <strong>Safari</strong> (ليس Chrome)</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:10px">
+                  <span style="font-size:1.6rem">2️⃣</span>
+                  <span style="font-size:.88rem">اضغطي على أيقونة <strong>المشاركة</strong> ↑ أسفل الشاشة</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:10px">
+                  <span style="font-size:1.6rem">3️⃣</span>
+                  <span style="font-size:.88rem">اختاري <strong>«إضافة إلى الشاشة الرئيسية»</strong></span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:10px">
+                  <span style="font-size:1.6rem">4️⃣</span>
+                  <span style="font-size:.88rem">اضغطي <strong>«إضافة»</strong> — وستجدين التطبيق على شاشتك ✨</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="pwa-desktop-guide" style="display:none">
+            <div style="background:#faf7ff;border:1.5px solid rgba(123,45,139,.2);border-radius:14px;padding:14px;text-align:center">
+              <p style="font-size:1.3rem;margin-bottom:4px">💻</p>
+              <p style="color:#7B2D8B;font-weight:700;font-size:.9rem;margin:0">لتثبيت التطبيق، افتحيه من هاتفك</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKIN CARE ASSISTANT MODAL -->
+  <div id="wizard-modal" class="modal-overlay hidden">
+    <div class="wizard-container" id="wizard-box">
+      <button class="modal-close" id="wizard-close">✕</button>
+      <div class="wizard-step active" data-step="1">
+          <h2 class="wizard-title">أهلاً بكِ! دعينا نكتشف الروتين المثالي لبشرتك ✨</h2>
+          <p class="wizard-sub">ما هو نوع بشرتك الحالي؟</p>
+          <div class="wizard-options">
+            <div class="opt-card" data-val="oily">
+              <span class="opt-icon">💧</span>
+              <span class="opt-label">دهنية</span>
+            </div>
+            <div class="opt-card" data-val="dry">
+              <span class="opt-icon">🌵</span>
+              <span class="opt-label">جافة</span>
+            </div>
+            <div class="opt-card" data-val="mixed">
+              <span class="opt-icon">🍃</span>
+              <span class="opt-label">مختلطة</span>
+            </div>
+            <div class="opt-card" data-val="sensitive">
+              <span class="opt-icon">🕯️</span>
+              <span class="opt-label">حساسة</span>
+            </div>
+          </div>
+        </div>
+        <div class="wizard-step" data-step="2">
+          <h2 class="wizard-title">ما هو هدفك الأساسي اليوم؟ 🎯</h2>
+          <p class="wizard-sub">اختاري ما تودين التركيز عليه:</p>
+          <div class="wizard-options">
+            <div class="opt-card" data-val="acne">
+              <span class="opt-icon">🧼</span>
+              <span class="opt-label">إزالة الحبوب</span>
+            </div>
+            <div class="opt-card" data-val="hydration">
+              <span class="opt-icon">💦</span>
+              <span class="opt-label">ترطيب عميق</span>
+            </div>
+            <div class="opt-card" data-val="glow">
+              <span class="opt-icon">✨</span>
+              <span class="opt-label">نضارة وإشراق</span>
+            </div>
+            <div class="opt-card" data-val="lift">
+              <span class="opt-icon">🆙</span>
+              <span class="opt-label">شد ومحاربة التجاعيد</span>
+            </div>
+          </div>
+          <button class="btn btn-ghost" id="wizard-back">العودة للسابق</button>
+        </div>
+        <div class="wizard-step" data-step="3">
+          <h2 class="wizard-title">لقد وجدنا لكِ الأنسب! 🎁</h2>
+          <p class="wizard-sub">بناءً على اختياراتك، ننصحك بهذه المنتجات:</p>
+          <div class="wizard-results" id="wizard-results-list">
+          </div>
+          <button class="btn btn-gold" id="wizard-reset" style="margin-top:30px">بدأ فحص جديد</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ ANNOUNCEMENT BOARD ═══════════════════════════════ -->
+  <div id="announcement-bar" class="announcement-bar" role="complementary">
+    <div class="announcement-marquee" id="announcement-text">
+      <span>✨ شحن مجاني للطلبات فوق 200 ₪ ✨</span>
+      <span>🌟 خصم 15% على أول طلب بـ كود: BZ15 🌟</span>
+      <span>💖 اكتشفي أجمل منتجات العناية بالبشرة والمكياج 💖</span>
+      <span>✨ شحن مجاني للطلبات فوق 200 ₪ ✨</span>
+      <span>🌟 خصم 15% على أول طلب بـ كود: BZ15 🌟</span>
+    </div>
+  </div>
+
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Page Transition Overlay -->
+  <div id="page-overlay"></div>
+
+  <!-- ═══════════════════════════════ NAVBAR ═══════════════════════════════ -->
+  <nav id="navbar" class="navbar" role="navigation" aria-label="القائمة الرئيسية">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" aria-label="Beauty Zone - الصفحة الرئيسية">
+        <div class="logo-stack">
+          <span class="logo-glow">Beauty Zone</span>
+          <span class="logo-divider"></span>
+          <span class="logo-ar">بيوتي زون</span>
+        </div>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#categories" class="nav-link">الفئات</a></li>
+        <li><a href="#bestsellers" class="nav-link">الأكثر مبيعاً</a></li>
+        <li><a href="#about" class="nav-link">عن المتجر</a></li>
+        <li><a href="#contact" class="nav-link">تواصلي معنا</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-btn" id="open-login" title="دخول / تسجيل">
+           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <button class="nav-btn" id="wishlist-btn" aria-label="المفضلة">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <button class="nav-btn cart-btn" id="cart-icon" aria-label="السلة">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span id="cart-badge" class="cart-badge">0</span>
+        </button>
+        <a href="admin.html" class="nav-btn admin-btn" aria-label="لوحة التحكم">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </a>
+        <button class="nav-btn pwa-install-nav-btn" id="pwa-install-nav" title="تثبيت التطبيق" style="display:none" aria-label="تثبيت التطبيق">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v13m0 0l-4-4m4 4l4-4"/><path d="M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>
+        </button>
+        <button class="theme-toggle-pill" id="theme-toggle" title="الوضع الليلي" aria-pressed="false" aria-label="تبديل الثيم">
+          <span class="ttp-icon ttp-sun">☀️</span>
+          <span class="ttp-thumb"></span>
+          <span class="ttp-icon ttp-moon">🌙</span>
+        </button>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="القائمة" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+      <ul role="list">
+        <li><a href="#categories" class="nav-link">الفئات</a></li>
+        <li><a href="#bestsellers" class="nav-link">الأكثر مبيعاً</a></li>
+        <li><a href="#about" class="nav-link">عن المتجر</a></li>
+        <li><a href="#contact" class="nav-link">تواصلي معنا</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+  <section id="hero" aria-label="الصفحة الرئيسية">
+    
+
+
+    <!-- Aurora Blobs -->
+    <div class="aurora-layer" aria-hidden="true">
+      <div class="blob blob-a"></div>
+      <div class="blob blob-b"></div>
+      <div class="blob blob-c"></div>
+      <div class="blob blob-d"></div>
+    </div>
+
+    <canvas id="hero-canvas"></canvas>
+    <canvas id="dust-canvas"></canvas>
+    <div id="hero-bg" class="hero-bg-layer" aria-hidden="true"></div>
+    
+    <!-- Hero Background Video (only background) -->
+    <video class="hero-bg-image hero-bg-video" id="hero-bg-video"
+           autoplay loop muted playsinline
+           aria-hidden="true"
+           preload="auto">
+      <source src="assets/hero-bg.mp4" type="video/mp4">
+    </video>
+    
+    <!-- Admin override image (shown only when admin sets a custom image) -->
+    <img class="hero-bg-image hero-admin-img" id="hero-admin-img"
+         src="" alt="" aria-hidden="true"
+         style="display:none;z-index:2;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center" />
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">بيوتي زون — مستحضرات فاخرة</span>
+      </div>
+
+      <h1 class="hero-headline" id="hero-headline"></h1>
+
+      <p class="hero-subline" id="typed-target"></p>
+
+      <div class="hero-ctas">
+        <a href="#category-sections" class="btn btn-vintage" id="hero-cta-1">
+          <span class="vbtn-ornament">❧</span>
+          تسوّقي الآن
+          <span class="vbtn-ornament">❧</span>
+        </a>
+        <button class="btn btn-vintage-ghost" id="open-assistant-hero">
+          <span class="vbtn-ornament">✦</span>
+          العناية ببشرتك
+          <span class="vbtn-ornament">✦</span>
+        </button>
+      </div>
+    </div>
+
+
+  </section>
+
+  <!-- ═══════════════════════════════ STICKY CATEGORY CHIPS ═══════════════════════════════ -->
+  <div class="cat-chips-bar" id="cat-chips-bar">
+    <div class="cat-chips-inner">
+      <a href="#category-sections" class="cat-chip cat-chip-all active" data-cat="all">
+        <span class="cat-chip-icon">✨</span>
+        <span>الكل</span>
+      </a>
+      <a href="#section-makeup" class="cat-chip" data-cat="makeup">
+        <span class="cat-chip-icon">💄</span>
+        <span>مكياج</span>
+      </a>
+      <a href="#section-skincare" class="cat-chip" data-cat="skincare">
+        <span class="cat-chip-icon">🌿</span>
+        <span>عناية البشرة</span>
+      </a>
+      <a href="#section-personal" class="cat-chip" data-cat="personal">
+        <span class="cat-chip-icon">🧴</span>
+        <span>عناية شخصية</span>
+      </a>
+      <a href="#section-vitamins" class="cat-chip" data-cat="vitamins">
+        <span class="cat-chip-icon">💊</span>
+        <span>فيتامينات</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ FLASH DEALS ═══════════════════════════════ -->
+  <section id="flash-deals" class="flash-deals-section">
+    <div class="fd-header">
+      <div class="fd-title-wrap">
+        <span class="fd-fire">⚡</span>
+        <div>
+          <p class="fd-eyebrow">Limited Time · وقت محدود</p>
+          <h2 class="fd-title">عروض اليوم</h2>
+        </div>
+      </div>
+      <div class="fd-countdown" id="fd-countdown">
+        <div class="fd-unit"><span id="fd-h">00</span><small>س</small></div>
+        <span class="fd-colon">:</span>
+        <div class="fd-unit"><span id="fd-m">00</span><small>د</small></div>
+        <span class="fd-colon">:</span>
+        <div class="fd-unit"><span id="fd-s">00</span><small>ث</small></div>
+      </div>
+    </div>
+    <div class="fd-track-wrap">
+      <div class="fd-track" id="fd-track">
+        <!-- injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ SEARCH BAR ═══════════════════════════════ -->
+  <div class="container search-nav-container" data-reveal>
+    <div class="search-box-wrap">
+      <div class="brutalist-search-container">
+        <input type="text" id="global-product-search" class="brutalist-search-input smooth-type" placeholder="ابحثي عن منتج، اسم، أو كلمة مفتاحية..." autocomplete="off">
+        <label class="brutalist-search-label" for="global-product-search">🔍 بحث</label>
+      </div>
+      <div class="search-autocomplete" id="search-autocomplete"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ CATEGORY SECTIONS (PRODUCTS) ═══════════════════════════════ -->
+  <div id="category-sections">
+    <!-- Sections injected by JS -->
+  </div>
+
+  <!-- ═══════════════════════════════ SHOP BY BRAND ═══════════════════════════════ -->
+  <section class="brands-section" aria-label="تسوقي حسب الماركة">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="section-eyebrow">Multi-Brand · متعدد الماركات</p>
+        <h2 class="section-title">تسوّقي حسب الماركة</h2>
+        <p class="section-sub">أكثر من ١٢ ماركة عالمية في متجر واحد</p>
+      </div>
+      <div class="brands-grid" data-reveal>
+        <div class="brand-card"><span class="brand-emoji">💋</span><span class="brand-name">NYX</span></div>
+        <div class="brand-card"><span class="brand-emoji">🌹</span><span class="brand-name">L'Oréal</span></div>
+        <div class="brand-card"><span class="brand-emoji">✨</span><span class="brand-name">Maybelline</span></div>
+        <div class="brand-card"><span class="brand-emoji">💙</span><span class="brand-name">Nivea</span></div>
+        <div class="brand-card"><span class="brand-emoji">🌿</span><span class="brand-name">Garnier</span></div>
+        <div class="brand-card"><span class="brand-emoji">🕊️</span><span class="brand-name">Dove</span></div>
+        <div class="brand-card"><span class="brand-emoji">👑</span><span class="brand-name">MAC</span></div>
+        <div class="brand-card"><span class="brand-emoji">🌸</span><span class="brand-name">Fenty Beauty</span></div>
+        <div class="brand-card"><span class="brand-emoji">🧴</span><span class="brand-name">Pantene</span></div>
+        <div class="brand-card"><span class="brand-emoji">💎</span><span class="brand-name">Charlotte Tilbury</span></div>
+        <div class="brand-card"><span class="brand-emoji">🌺</span><span class="brand-name">Rare Beauty</span></div>
+        <div class="brand-card"><span class="brand-emoji">🍀</span><span class="brand-name">The Ordinary</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ CATEGORIES ═══════════════════════════════ -->
+  <section id="categories" class="section categories-section" aria-label="الفئات">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="section-eyebrow">تصفّحي حسب الفئة</p>
+        <h2 class="section-title">كل ما تحتاجينه للجمال</h2>
+      </div>
+      <div class="categories-grid" id="categories-grid">
+        <a href="#" class="cat-card" data-cat="scarves" data-reveal data-delay="0">
+          <div class="cat-img-wrap">
+            <div class="cat-img cat-gradient-bg cat-gradient-scarves"><span class="cat-emoji">🧣</span></div>
+            <div class="cat-gradient"></div>
+          </div>
+          <div class="cat-info">
+            <span class="cat-en">Scarves</span>
+            <h3 class="cat-ar">شالات وأوشحة</h3>
+            <span class="cat-count" id="count-scarves">0 منتج</span>
+          </div>
+          <div class="cat-arrow">←</div>
+        </a>
+        <a href="#" class="cat-card" data-cat="makeup" data-reveal data-delay="0.1">
+          <div class="cat-img-wrap">
+            <div class="cat-img cat-gradient-bg cat-gradient-makeup"><span class="cat-emoji">💄</span></div>
+            <div class="cat-gradient"></div>
+          </div>
+          <div class="cat-info">
+            <span class="cat-en">Makeup</span>
+            <h3 class="cat-ar">مكياج</h3>
+            <span class="cat-count" id="count-makeup">0 منتج</span>
+          </div>
+          <div class="cat-arrow">←</div>
+        </a>
+        <a href="#" class="cat-card" data-cat="skincare" data-reveal data-delay="0.18">
+          <div class="cat-img-wrap">
+            <div class="cat-img cat-gradient-bg cat-gradient-skincare"><span class="cat-emoji">🌿</span></div>
+            <div class="cat-gradient"></div>
+          </div>
+          <div class="cat-info">
+            <span class="cat-en">Skincare</span>
+            <h3 class="cat-ar">عناية بالبشرة</h3>
+            <span class="cat-count" id="count-skincare">0 منتج</span>
+          </div>
+          <div class="cat-arrow">←</div>
+        </a>
+        <a href="#" class="cat-card" data-cat="vitamins" data-reveal data-delay="0.26">
+          <div class="cat-img-wrap">
+            <div class="cat-img cat-gradient-bg cat-gradient-vitamins"><span class="cat-emoji">💊</span></div>
+            <div class="cat-gradient"></div>
+          </div>
+          <div class="cat-info">
+            <span class="cat-en">Vitamins</span>
+            <h3 class="cat-ar">فيتامينات ومكملات</h3>
+            <span class="cat-count" id="count-vitamins">0 منتج</span>
+          </div>
+          <div class="cat-arrow">←</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ PARTNER STORES ═══════════════════════════════ -->
+  <section id="stores" class="section stores-section" aria-label="المتاجر الشريكة">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="section-eyebrow">Marketplace · المتاجر</p>
+        <h2 class="section-title">اكتشفي أرقى الماركات</h2>
+      </div>
+      <div class="stores-grid" id="stores-grid">
+        <!-- Stores injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ BESTSELLERS (PINNED HORIZONTAL) ═══════════════════════════════ -->
+  <section class="bestsellers-section" id="bestsellers" aria-label="الأكثر مبيعاً">
+    <div class="bestsellers-header container" data-reveal>
+      <p class="section-eyebrow">Bestsellers · الأكثر مبيعاً</p>
+      <h2 class="section-title shimmer-gold-text">اختيارات تُشعل إطلالتك ✨</h2>
+    </div>
+    <div class="bestsellers-track-wrap">
+      <div class="bestsellers-track" id="bestsellers-track">
+        <!-- Product cards injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ DIVIDER RIBBON ═══════════════════════════════ -->
+  <div class="image-separator-ribbon" aria-hidden="true" role="presentation"></div>
+
+  <!-- ═══════════════════════════════ HOW IT WORKS ═══════════════════════════════ -->
+  <section id="how" class="section how-section" aria-label="كيف يعمل المتجر">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="section-eyebrow">Simple · سهل وسريع</p>
+        <h2 class="section-title">كيف تطلبين من بيوتي زون؟</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card" data-reveal data-delay="0">
+          <div class="step-num" data-step="1">١</div>
+          <div class="step-icon">🛍️</div>
+          <h3 class="step-title">اختاري منتجك</h3>
+          <p class="step-desc">تصفّحي آلاف المنتجات واختاري ما يناسب جمالك</p>
+        </div>
+        <div class="step-divider" aria-hidden="true">←</div>
+        <div class="step-card" data-reveal data-delay="0.12">
+          <div class="step-num" data-step="2">٢</div>
+          <div class="step-icon">🛒</div>
+          <h3 class="step-title">أضيفيه للسلة</h3>
+          <p class="step-desc">أضيفي منتجاتك المفضلة لسلة التسوق بضغطة واحدة</p>
+        </div>
+        <div class="step-divider" aria-hidden="true">←</div>
+        <div class="step-card" data-reveal data-delay="0.24">
+          <div class="step-num" data-step="3">٣</div>
+          <div class="step-icon">💬</div>
+          <h3 class="step-title">تأكيدي عبر واتساب</h3>
+          <p class="step-desc">طلبك يُرسل مباشرةً عبر واتساب لتأكيد سريع وآمن</p>
+        </div>
+        <div class="step-divider" aria-hidden="true">←</div>
+        <div class="step-card" data-reveal data-delay="0.36">
+          <div class="step-num" data-step="4">٤</div>
+          <div class="step-icon">✨</div>
+          <h3 class="step-title">استقبلي جمالك</h3>
+          <p class="step-desc">توصيل سريع لباب بيتك — جمالك يستاهل الأفضل</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ TESTIMONIALS MARQUEE ═══════════════════════════════ -->
+  <section id="testimonials" class="section testimonials-section" aria-label="آراء العملاء">
+    <div class="section-header container" data-reveal>
+      <p class="section-eyebrow">Reviews · آراء عميلاتنا</p>
+      <h2 class="section-title">ماذا قالن عن بيوتي زون؟</h2>
+    </div>
+    <div class="marquee-wrap" aria-label="التقييمات">
+      <div class="marquee-track" id="marquee-track">
+        <!-- Testimonials x2 for infinite scroll -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ NEWSLETTER ═══════════════════════════════ -->
+  <section id="newsletter" class="section newsletter-section" aria-label="النشرة البريدية">
+    <div class="container">
+      <div class="newsletter-card glass-card" data-reveal>
+        <div class="newsletter-decor" aria-hidden="true">✨</div>
+        <p class="section-eyebrow">Newsletter · النشرة</p>
+        <h2 class="newsletter-title">كوني أول من تعرفين بالعروض 💌</h2>
+        <p class="newsletter-sub">اشتركي وإستقبلي خصم 10% على أول طلب</p>
+        <form class="newsletter-form" id="newsletter-form" novalidate aria-label="نموذج الاشتراك">
+          <input type="email" class="newsletter-input" placeholder="بريدك الإلكتروني..." aria-label="البريد الإلكتروني" id="newsletter-email" />
+          <button type="submit" class="btn btn-primary ripple-btn" id="newsletter-btn">اشتركي الآن</button>
+        </form>
+        <p class="newsletter-note">لن نشارك بريدك مع أي جهة أخرى 🔒</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+  <footer id="contact" class="footer" aria-label="تذييل الموقع">
+    <div class="footer-top container">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-stack">
+            <span class="logo-glow">Beauty Zone</span>
+            <span class="logo-divider"></span>
+            <span class="logo-ar">بيوتي زون</span>
+          </div>
+        </div>
+        <p class="footer-tagline">جمالك، بلمسة فرق ✨</p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" id="social-instagram" aria-label="إنستقرام" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="#" class="social-btn" id="social-facebook" aria-label="فيسبوك" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a href="https://wa.me/972500000000" class="social-btn" id="social-whatsapp" aria-label="واتساب" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.973-1.412A9.953 9.953 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4 class="footer-heading">روابط سريعة</h4>
+        <ul role="list">
+          <li><a href="#categories">الفئات</a></li>
+          <li><a href="#bestsellers">الأكثر مبيعاً</a></li>
+          <li><a href="#newsletter">العروض</a></li>
+          <li><a href="admin.html">لوحة التحكم</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4 class="footer-heading">تواصلي معنا</h4>
+        <ul role="list">
+          <li><a href="https://wa.me/972500000000" target="_blank" rel="noopener">واتساب</a></li>
+          <li><a href="mailto:hello@beautyzone.ps">hello@beautyzone.ps</a></li>
+          <li><span>فلسطين 🇵🇸</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      <p>© 2026 Beauty Zone · بيوتي زون — جميع الحقوق محفوظة</p>
+      <p class="footer-made">صُنع بـ ♥ لعميلاتنا الجميلات</p>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════ PRODUCT DETAIL MODAL ═══════════════════════════════ -->
+  <!-- ═══════════════════════════════ COMPACT QUICK VIEW ═══════════════════════════════ -->
+  <div id="quick-view" class="qv-overlay" role="dialog" aria-modal="true" aria-label="معلومات المنتج" hidden>
+    <div class="qv-card">
+      <button class="qv-close" id="qv-close" aria-label="إغلاق">✕</button>
+      <div class="qv-img-wrap">
+        <img class="qv-img" id="qv-img" src="" alt="" />
+      </div>
+      <div class="qv-info">
+        <span class="qv-cat" id="qv-cat"></span>
+        <h3 class="qv-title" id="qv-title"></h3>
+        <p class="qv-price" id="qv-price"></p>
+        <p class="qv-desc" id="qv-desc"></p>
+        <button class="qv-add-btn ripple-btn" id="qv-add-btn">أضيفي للسلة 🛒</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="product-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="تفاصيل المنتج" hidden>
+    <div class="modal-box">
+      <button class="modal-close" id="modal-close" aria-label="إغلاق">✕</button>
+      <div class="modal-inner">
+        <div class="modal-gallery">
+          <div class="swiper modal-swiper" id="modal-swiper">
+            <div class="swiper-wrapper" id="modal-swiper-slides"></div>
+            <div class="swiper-pagination"></div>
+          </div>
+        </div>
+        <div class="modal-details">
+          <span class="product-cat-badge" id="modal-cat"></span>
+          <h2 class="modal-title" id="modal-title"></h2>
+          <div class="modal-stars">★★★★★ <span class="modal-reviews">(24 تقييم)</span></div>
+          <div class="modal-price-row">
+            <span class="modal-price" id="modal-price"></span>
+          </div>
+          <p class="modal-desc" id="modal-desc"></p>
+          <div class="modal-qty">
+            <button class="qty-btn" id="modal-qty-minus" aria-label="تقليل الكمية">−</button>
+            <span class="qty-val" id="modal-qty-val">1</span>
+            <button class="qty-btn" id="modal-qty-plus" aria-label="زيادة الكمية">+</button>
+          </div>
+          <button class="btn btn-primary ripple-btn modal-add-btn" id="modal-add-to-cart">
+            أضيفي للسلة 🛒
+          </button>
+          <button class="btn btn-ghost modal-wish-btn" id="modal-wishlist-btn">
+            أضيفي للمفضلة ♥
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ CART DRAWER ═══════════════════════════════ -->
+  <div id="cart-overlay" class="cart-overlay" aria-hidden="true"></div>
+  <aside id="cart-drawer" class="cart-drawer" role="complementary" aria-label="سلة التسوق" aria-hidden="true">
+    <div class="cart-header">
+      <h3 class="cart-title">سلة التسوق 🛒</h3>
+      <button class="cart-close" id="cart-close" aria-label="إغلاق السلة">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty" id="cart-empty">
+        <div class="cart-empty-icon">🛍️</div>
+        <p>السلة فارغة — اكتشفي منتجاتنا!</p>
+      </div>
+    </div>
+    <div class="cart-footer" id="cart-footer" hidden>
+      <div class="cart-total-row">
+        <span>المجموع الكلي</span>
+        <span class="cart-total" id="cart-total">0 ₪</span>
+      </div>
+      <button class="btn btn-primary ripple-btn whatsapp-btn" id="checkout-whatsapp">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.030-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+        تأكيدي الطلب عبر واتساب
+      </button>
+      <button class="btn ripple-btn bank-btn" id="checkout-bank">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M4 10v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4zm0-2h16V6H4v2zm0-6v2h16V4H4z"/></svg>
+        تحويل بنكي
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════ WISHLIST DRAWER ═══════════════════════════════ -->
+  <div id="wishlist-overlay" class="cart-overlay" aria-hidden="true"></div>
+  <aside id="wishlist-drawer" class="cart-drawer" role="complementary" aria-label="المفضلة" aria-hidden="true">
+    <div class="cart-header">
+      <h3 class="cart-title">المفضلة ❤️</h3>
+      <button class="cart-close" id="wishlist-close" aria-label="إغلاق المفضلة">✕</button>
+    </div>
+    <div class="cart-items" id="wishlist-items">
+      <div class="cart-empty" id="wishlist-empty">
+        <div class="cart-empty-icon">❤️</div>
+        <p>المفضلة فارغة — أضيفي ما يعجبك!</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════ SUCCESS PAGE OVERLAY ═══════════════════════════════ -->
+  <div id="success-overlay" class="success-overlay" hidden>
+    <div class="success-box glass-card">
+      <div id="lottie-check" class="lottie-wrap"></div>
+      <h2 class="success-title">تم إرسال طلبك! 🎉</h2>
+      <p class="success-sub">رقم الطلب: <strong id="order-id-display"></strong></p>
+      <p class="success-note" id="success-note">سنتواصل معك عبر واتساب لتأكيد الطلب قريباً 💬</p>
+      <button class="btn btn-primary ripple-btn" id="success-close">العودة للمتجر</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ MY ORDERS MODAL ═══════════════════════════════ -->
+  <div id="my-orders-modal" class="modal-overlay hidden" style="display:none">
+    <div class="my-orders-box">
+      <button class="modal-close" id="my-orders-close">✕</button>
+      <div class="my-orders-header">
+        <span class="mo-icon">📦</span>
+        <h2>طلباتي</h2>
+      </div>
+      <div class="my-orders-list" id="my-orders-list">
+        <!-- Orders will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ BANK TRANSFER MODAL ═══════════════════════════════ -->
+  <div id="bank-transfer-modal" class="modal-overlay hidden" style="display:none">
+    <div class="bank-transfer-box">
+      <button class="modal-close" id="bank-transfer-close">✕</button>
+      <div class="bt-header">
+        <span class="bt-icon">🏦</span>
+        <h2>الدفع بتحويل بنكي</h2>
+      </div>
+
+      <div class="bt-account-info">
+        <p class="bt-section-title">📋 بيانات الحساب</p>
+        <div class="bt-info-row">
+          <span class="bt-label">اسم صاحب الحساب:</span>
+          <span class="bt-value">Beauty Zone</span>
+        </div>
+        <div class="bt-info-row">
+          <span class="bt-label">رقم الحساب:</span>
+          <span class="bt-value" dir="ltr">1234567890</span>
+        </div>
+        <div class="bt-info-row">
+          <span class="bt-label">رقم الفرع:</span>
+          <span class="bt-value">0022</span>
+        </div>
+        <div class="bt-info-row">
+          <span class="bt-label">البنك:</span>
+          <span class="bt-value">بنك فلسطين</span>
+        </div>
+      </div>
+
+      <div class="bt-instructions">
+        <p>⚠️ <strong>التعليمات:</strong></p>
+        <p>1. قومي بالتحويل عبر تطبيق بنك فلسطين (Barki)</p>
+        <p>2. بعد التحويل، ستصلك رسالة تأكيد على جوالك</p>
+        <p>3. أدخلي رقم المرجع (Reference ID) من رسالة التأكيد</p>
+        <p>4. أو يمكنك رفع صورة الإشعار (اختياري)</p>
+      </div>
+
+      <form id="bank-transfer-form" class="bt-form">
+        <div class="bt-form-group">
+          <label>اسم المحوّل (كما هو في التحويل) *</label>
+          <input type="text" id="bt-name" class="login-input" placeholder="اسمك الكامل" required />
+        </div>
+        <div class="bt-form-group">
+          <label>رقم المرجع (Reference ID) *</label>
+          <input type="text" id="bt-ref" class="login-input" placeholder="رقم المرجع من رسالة البنك" required />
+        </div>
+        <div class="bt-form-group">
+          <label>المبلغ المحوّل (₪) *</label>
+          <input type="number" id="bt-amount" class="login-input" placeholder="أدخلي المبلغ" required />
+        </div>
+        <div class="bt-form-group">
+          <label>رفع صورة الإشعار (اختياري)</label>
+          <input type="file" id="bt-screenshot" class="login-input" accept="image/*" />
+        </div>
+        <div class="bt-order-summary">
+          <p>رقم الطلب: <strong id="bt-order-id">-</strong></p>
+          <p>الإجمالي: <strong id="bt-total">0 ₪</strong></p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">✓ تأكيد التحويل</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ MOBILE BOTTOM NAVIGATION ═══════════════════════════════ -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <a href="#hero" class="mbn-item active" data-tab="home" id="mbn-home">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="mbn-label">الرئيسية</span>
+    </a>
+    <a href="javascript:void(0)" class="mbn-item" data-tab="search" id="mbn-search">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="mbn-label">بحث</span>
+    </a>
+    <a href="javascript:void(0)" class="mbn-item mbn-cart cart-trigger" id="bottom-cart-btn">
+      <div class="mbn-cart-bubble">
+        <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="mbn-badge" id="mbn-cart-badge">0</span>
+      </div>
+      <span class="mbn-label">السلة</span>
+    </a>
+    <a href="javascript:void(0)" class="mbn-item" id="mbn-chat-btn" onclick="openChatModal()">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="mbn-label">شات</span>
+    </a>
+    <a href="javascript:void(0)" class="mbn-item" id="bottom-wishlist-btn" data-tab="wishlist">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="mbn-label">المفضلة</span>
+    </a>
+    <a href="javascript:void(0)" class="mbn-item" id="bottom-profile-btn" data-tab="profile">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="mbn-label">حسابي</span>
+    </a>
+  </nav>
+
+  <!-- Upgrades CSS -->
+  <link rel="stylesheet" href="css/upgrades.css">
+
+  <!-- Scroll-to-top -->
+  <button id="scroll-top-btn" aria-label="للأعلى">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Set these from Vercel Environment Variables or use empty strings for local development
+    window.SUPABASE_URL = window.SUPABASE_URL || '';
+    window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+  </script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/glow-data.js"></script>
+  <script src="js/glow-main.js"></script>
+  <script src="js/theme-toggle.js"></script>
+  <script src="js/upgrades.js"></script>
+
+  <!-- Floating PWA Install Button (side) -->
+  <button id="pwa-float-btn" class="pwa-float-btn" onclick="triggerPwaInstall()" style="display:none" aria-label="تثبيت التطبيق">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    <span class="pwa-float-label">ثبّتي التطبيق</span>
+  </button>
+
+  <!-- Floating WhatsApp Button -->
+  <a href="https://wa.me/972500000000" class="whatsapp-float" target="_blank" rel="noopener" aria-label="تواصلي عبر واتساب">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.973-1.412A9.953 9.953 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+    <span class="whatsapp-float-tip">تواصلي معنا الآن 💬</span>
+  </a>
+
+  <!-- ═══════════════════════════════ CHAT MODAL ═══════════════════════════════ -->
+  <div id="chat-modal" class="modal-overlay hidden" style="display:none">
+    <div class="chat-modal-box">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <span class="chat-header-icon">💬</span>
+          <div>
+            <p class="chat-header-title">الدعم الفني</p>
+            <p class="chat-header-status">متصل</p>
+          </div>
+        </div>
+        <button class="modal-close" id="chat-close">✕</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-empty-state">
+          <p>👋 أهلاً بك!</p>
+          <p>كيف يمكننك مساعدتك اليوم؟</p>
+        </div>
+      </div>
+      <div class="chat-payment-notif" id="chat-payment-section" style="display:none">
+        <div class="payment-notif-form">
+          <input type="number" id="payment-amount" class="chat-input" placeholder="المبلغ المدفوع (₪)" />
+          <button class="btn btn-primary btn-sm" id="send-payment-notif">إرسال إشعار الدفع</button>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <button class="chat-payment-btn" id="chat-payment-toggle" title="إشعار دفع">💰</button>
+        <input type="text" id="chat-input" class="chat-input" placeholder="اكتبي رسالتك..." />
+        <button class="chat-send-btn" id="chat-send">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-page spider web background -->
+  <canvas id="page-web-canvas" aria-hidden="true"></canvas>
+
+  <script>
+    // Lazy image fade-in
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+      if (img.complete) { img.classList.add('loaded'); }
+      else { img.addEventListener('load', () => img.classList.add('loaded')); }
+    });
+  </script>
+</body>
+</html>
