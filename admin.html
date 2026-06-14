@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم · Beauty Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --rose: #E8A4B8;
+      --plum: #6B2D4E;
+      --gold: #C9A84C;
+      --bg: #f8f4f7;
+      --surface: #ffffff;
+      --text: #2A1020;
+      --text-mid: #5A3048;
+      --border: #ead5e5;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(107,45,78,0.1);
+    }
+    body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Auth Gate ── */
+    #auth-gate {
+      position: fixed; inset: 0; background: linear-gradient(135deg, #2A1020, #6B2D4E);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .auth-box {
+      background: #fff; border-radius: 20px; padding: 40px 36px; width: 360px;
+      text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .auth-box h2 { font-size: 1.6rem; color: var(--plum); margin-bottom: 6px; }
+    .auth-box p  { color: var(--text-mid); margin-bottom: 28px; font-size: 0.95rem; }
+    .auth-input {
+      width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 10px;
+      font-family: inherit; font-size: 1rem; margin-bottom: 14px; outline: none;
+      transition: border-color .2s;
+    }
+    .auth-input:focus { border-color: var(--plum); }
+    .auth-btn {
+      width: 100%; padding: 13px; background: linear-gradient(135deg, var(--plum), #9b4077);
+      color: #fff; border: none; border-radius: 10px; font-size: 1.05rem;
+      font-family: inherit; cursor: pointer; font-weight: 600; transition: opacity .2s;
+    }
+    .auth-btn:hover { opacity: .88; }
+    .auth-error { color: #c0392b; font-size: 0.9rem; margin-top: 10px; display: none; }
+
+    /* ── Layout ── */
+    .admin-wrap { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 230px; background: linear-gradient(180deg, #2A1020, #6B2D4E);
+      color: #fff; display: flex; flex-direction: column; padding: 28px 0;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0;
+    }
+    .sidebar-logo { text-align: center; padding: 0 20px 28px; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .sidebar-logo h1 { font-size: 1.3rem; color: var(--rose); }
+    .sidebar-logo span { font-size: .8rem; opacity: .6; }
+    .sidebar-nav { flex: 1; padding: 20px 0; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 13px 24px;
+      cursor: pointer; transition: background .2s; font-size: .95rem; opacity: .8;
+      border-right: 3px solid transparent;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.08); opacity: 1; }
+    .nav-item.active { background: rgba(255,255,255,.14); opacity: 1; border-right-color: var(--rose); }
+    .nav-item .icon { font-size: 1.2rem; width: 22px; text-align: center; }
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid rgba(255,255,255,.12); }
+    .btn-logout {
+      width: 100%; padding: 10px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: .9rem;
+      transition: background .2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,.18); }
+
+    /* ── Main ── */
+    .main-content { flex: 1; padding: 32px; overflow-y: auto; }
+    .page-title { font-size: 1.6rem; color: var(--plum); font-weight: 700; margin-bottom: 6px; }
+    .page-sub { color: var(--text-mid); margin-bottom: 28px; font-size: .95rem; }
+
+    /* ── Cards ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 32px; }
+    .stat-box {
+      background: var(--surface); border-radius: var(--radius); padding: 24px 20px;
+      box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center;
+    }
+    .stat-box .s-val { font-size: 2rem; font-weight: 700; color: var(--plum); }
+    .stat-box .s-label { font-size: .88rem; color: var(--text-mid); margin-top: 4px; }
+    .stat-box .s-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+    /* ── Panel ── */
+    .panel { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--plum); }
+
+    /* ── Buttons ── */
+    .btn { padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: .9rem; font-weight: 600; transition: opacity .2s; }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: linear-gradient(135deg, var(--plum), #9b4077); color: #fff; }
+    .btn-gold { background: linear-gradient(135deg, #c9a84c, #e6c87a); color: #2A1020; }
+    .btn-danger { background: #fff0f0; color: #c0392b; border: 1px solid #ffd0d0; }
+    .btn-sm { padding: 6px 14px; font-size: .82rem; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-mid); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th { background: #f5edf3; color: var(--plum); padding: 12px 14px; text-align: right; font-weight: 600; }
+    td { padding: 11px 14px; border-bottom: 1px solid #f0e6ee; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fdf8fc; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .78rem; font-weight: 600; }
+    .badge-green { background: #e6f9f0; color: #1a7a4a; }
+    .badge-orange { background: #fff3e0; color: #b35a00; }
+    .badge-red { background: #ffeaea; color: #c0392b; }
+    .badge-blue { background: #e8f0fe; color: #1a56db; }
+
+    /* ── Form ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: .88rem; color: var(--text-mid); font-weight: 500; }
+    .inp {
+      padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: .95rem; outline: none; transition: border-color .2s;
+    }
+    .inp:focus { border-color: var(--plum); }
+    textarea.inp { resize: vertical; min-height: 80px; }
+    select.inp { cursor: pointer; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(42,16,32,.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background: #fff; border-radius: 18px; padding: 32px; width: 100%; max-width: 600px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--plum); }
+    .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #999; line-height: 1; }
+    .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+    /* ── Tab sections ── */
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+
+    /* ── Announcement ── */
+    .announce-wrap { display: flex; gap: 12px; align-items: flex-start; }
+    .announce-wrap textarea { flex: 1; }
+    .star-btn { padding: 6px 12px; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; font-size: .82rem; transition: all .2s; }
+    .star-btn.active { border-color: var(--rose); background: #fdf0f5; color: var(--deep); font-weight: 700; }
+    .testi-row { display: flex; align-items: flex-start; gap: 14px; background: var(--warm-bg); border-radius: 12px; padding: 16px; border: 1px solid rgba(232,164,184,.2); }
+    .testi-row-body { flex: 1; min-width: 0; }
+    .testi-row-stars { color: #f5a623; font-size: .85rem; }
+    .testi-row-text { font-size: .9rem; color: var(--text-mid); margin: 4px 0 6px; line-height: 1.5; }
+    .testi-row-meta { font-size: .78rem; color: #aaa; }
+    .testi-avatar-sm { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,var(--rose),var(--gold)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+
+    /* ── Product image ── */
+    .product-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: #f0e6ee; }
+
+    /* ── Search ── */
+    .search-bar { display: flex; gap: 12px; margin-bottom: 18px; }
+    .search-bar input { flex: 1; }
+
+    /* ── Order detail ── */
+    .order-items-list { list-style: none; padding: 0; }
+    .order-items-list li { padding: 8px 0; border-bottom: 1px solid #f0e6ee; font-size: .9rem; }
+    .order-items-list li:last-child { border-bottom: none; }
+
+    /* ── Hero config ── */
+    .hero-preview-bar {
+      background: linear-gradient(135deg, #2A1020, #6B2D4E); color: #fff;
+      border-radius: 10px; padding: 16px 20px; margin-top: 16px; font-size: .9rem;
+    }
+    .hero-preview-bar strong { color: var(--rose); }
+
+    /* ── Toast ── */
+    #admin-toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(42,16,32,.95); color: #fff; padding: 13px 28px; border-radius: 50px;
+      font-size: .95rem; font-weight: 600; z-index: 9000; pointer-events: none;
+      opacity: 0; transition: all .3s ease; min-width: 240px; text-align: center;
+      border: 1px solid rgba(232,164,184,.3); box-shadow: 0 8px 30px rgba(0,0,0,.3);
+    }
+    #admin-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Confirm Dialog ── */
+    #admin-confirm {
+      position: fixed; inset: 0; background: rgba(42,16,32,.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 9500;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    #admin-confirm.show { opacity: 1; pointer-events: all; }
+    .confirm-box {
+      background: #fff; border-radius: 16px; padding: 32px; text-align: center;
+      max-width: 340px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .confirm-box p { font-size: 1.05rem; color: var(--text); margin-bottom: 24px; }
+    .confirm-box .confirm-btns { display: flex; gap: 12px; justify-content: center; }
+
+    /* ── Upload Zone ── */
+    .upload-zone {
+      border: 2.5px dashed var(--border);
+      border-radius: 16px;
+      padding: 36px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s;
+      background: #fdf9fc;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--plum);
+      background: rgba(107,45,78,.04);
+    }
+    .upload-icon { font-size: 2.4rem; margin-bottom: 8px; }
+    .upload-label { font-size: .95rem; font-weight: 600; color: var(--text); margin: 0; }
+    .asset-thumb {
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color .2s;
+      position: relative;
+    }
+    .asset-thumb:hover { border-color: var(--plum); }
+    .asset-thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .asset-thumb .copy-url-btn {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(107,45,78,.85);
+      color: #fff;
+      font-size: .7rem;
+      padding: 4px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .asset-thumb:hover .copy-url-btn { opacity: 1; }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo, .nav-item span, .sidebar-footer span { display: none; }
+      .nav-item { justify-content: center; padding: 16px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .main-content { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ AUTH GATE ═══ -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <h2>🌸 لوحة الإدارة</h2>
+    <p>Beauty Zone · بيوتي زون</p>
+    <form onsubmit="doAdminLogin(); return false;">
+      <input type="tel" id="ag-phone" class="auth-input" placeholder="رقم الهاتف" autocomplete="username" />
+      <input type="password" id="ag-pass" class="auth-input" placeholder="كلمة المرور" autocomplete="current-password" />
+      <button type="submit" class="auth-btn">دخول</button>
+    </form>
+    <p class="auth-error" id="auth-error">بيانات الدخول غير صحيحة</p>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LAYOUT ═══ -->
+<div class="admin-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>Beauty Zone</h1>
+      <span>لوحة الإدارة</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-tab="dashboard">
+        <span class="icon">📊</span><span>الرئيسية</span>
+      </div>
+      <div class="nav-item" data-tab="products">
+        <span class="icon">🛍️</span><span>المنتجات</span>
+      </div>
+      <div class="nav-item" data-tab="orders">
+        <span class="icon">📦</span><span>الطلبات</span>
+      </div>
+      <div class="nav-item" data-tab="users">
+        <span class="icon">👥</span><span>العملاء</span>
+      </div>
+      <div class="nav-item" data-tab="testimonials">
+        <span class="icon">💬</span><span>آراء العملاء</span>
+      </div>
+      <div class="nav-item" data-tab="settings">
+        <span class="icon">⚙️</span><span>الإعدادات</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="adminLogout()">🚪 <span>تسجيل الخروج</span></button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- ─── DASHBOARD ─── -->
+    <section class="tab-section active" id="tab-dashboard">
+      <p class="page-title">مرحباً بك، مديرتنا! 👋</p>
+      <p class="page-sub">هنا نظرة عامة على نشاط المتجر</p>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-box">
+          <div class="s-icon">🛍️</div>
+          <div class="s-val" id="stat-total-products">—</div>
+          <div class="s-label">إجمالي المنتجات</div>
+        </div>
+        <div class="stat-box">
+          <div class="s-icon">📦</div>
+          <div class="s-val" id="stat-total-orders">—</div>
+          <div class="s-label">إجمالي الطلبات</div>
+        </div>
+        <div class="stat-box">
+          <div class="s-icon">💰</div>
+          <div class="s-val" id="stat-total-revenue">—</div>
+          <div class="s-label">إجمالي الإيرادات (₪)</div>
+        </div>
+        <div class="stat-box">
+          <div class="s-icon">👥</div>
+          <div class="s-val" id="stat-total-users">—</div>
+          <div class="s-label">العملاء المسجلين</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📦 آخر الطلبات</span>
+          <button class="btn btn-ghost btn-sm" onclick="switchTab('orders')">عرض الكل</button>
+        </div>
+        <div class="table-wrap" id="recent-orders-table"></div>
+      </div>
+    </section>
+
+    <!-- ─── PRODUCTS ─── -->
+    <section class="tab-section" id="tab-products">
+      <p class="page-title">إدارة المنتجات 🛍️</p>
+      <p class="page-sub">أضيفي أو عدّلي أو احذفي المنتجات</p>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">قائمة المنتجات</span>
+          <button class="btn btn-primary btn-sm" onclick="openAddProduct()">+ إضافة منتج</button>
+        </div>
+        <div class="search-bar">
+          <input type="text" class="inp" id="product-search" placeholder="ابحثي عن منتج..." oninput="renderProducts()" />
+          <select class="inp" id="product-cat-filter" onchange="renderProducts()" style="width:auto">
+            <option value="">كل الفئات</option>
+            <option value="skincare">عناية بالبشرة</option>
+            <option value="makeup">مكياج</option>
+            <option value="personal">عناية شخصية</option>
+            <option value="vitamins">فيتامينات</option>
+            <option value="scarves">شالات</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>الصورة</th>
+                <th>اسم المنتج</th>
+                <th>الفئة</th>
+                <th>السعر</th>
+                <th>المخزون</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ORDERS ─── -->
+    <section class="tab-section" id="tab-orders">
+      <p class="page-title">إدارة الطلبات 📦</p>
+      <p class="page-sub">تتبّعي وأدّيري طلبات العملاء</p>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">جميع الطلبات</span>
+          <span id="orders-count" style="font-size:.85rem;color:var(--text-mid)"></span>
+        </div>
+        <div class="search-bar">
+          <input type="text" class="inp" id="order-search" placeholder="ابحثي برقم الطلب أو الاسم..." oninput="renderOrders()" />
+          <select class="inp" id="order-status-filter" onchange="renderOrders()" style="width:auto">
+            <option value="">كل الحالات</option>
+            <option value="جديد">جديد</option>
+            <option value="قيد التجهيز">قيد التجهيز</option>
+            <option value="تم الشحن">تم الشحن</option>
+            <option value="مكتمل">مكتمل</option>
+            <option value="ملغي">ملغي</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>العميل</th>
+                <th>الهاتف</th>
+                <th>المبلغ</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody"></tbody>
+          </table>
+        </div>
+        <p id="no-orders-msg" style="text-align:center;padding:40px;color:var(--text-mid);display:none">لا توجد طلبات بعد</p>
+      </div>
+    </section>
+
+    <!-- ─── USERS ─── -->
+    <section class="tab-section" id="tab-users">
+      <p class="page-title">العملاء المسجلون 👥</p>
+      <p class="page-sub">قائمة بجميع العملاء</p>
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>رقم الهاتف</th>
+                <th>البريد الإلكتروني</th>
+                <th>الصلاحية</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+        <p id="no-users-msg" style="text-align:center;padding:40px;color:var(--text-mid);display:none">لا يوجد عملاء مسجلون</p>
+      </div>
+    </section>
+
+    <!-- ─── SETTINGS ─── -->
+    <!-- ══ TESTIMONIALS TAB ══ -->
+    <section class="tab-section" id="tab-testimonials">
+      <p class="page-title">آراء العملاء 💬</p>
+      <p class="page-sub">أضيفي وعدّلي تقييمات العملاء التي تظهر في الموقع</p>
+
+      <!-- Add New Testimonial -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">➕ إضافة رأي جديد</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>اسم العميلة</label>
+            <input type="text" class="inp" id="t-name" placeholder="مثال: سارة الأحمد" maxlength="40" />
+          </div>
+          <div class="form-group">
+            <label>المدينة</label>
+            <input type="text" class="inp" id="t-location" placeholder="مثال: رام الله" maxlength="30" />
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label>نص التقييم</label>
+          <textarea class="inp" id="t-text" rows="3" maxlength="220" placeholder="اكتبي رأي العميلة هنا..."></textarea>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label>عدد النجوم</label>
+          <div style="display:flex;gap:10px;margin-top:8px" id="star-picker">
+            <button type="button" class="star-btn active" data-val="5" onclick="pickStar(5)">⭐⭐⭐⭐⭐ (5)</button>
+            <button type="button" class="star-btn" data-val="4" onclick="pickStar(4)">⭐⭐⭐⭐ (4)</button>
+            <button type="button" class="star-btn" data-val="3" onclick="pickStar(3)">⭐⭐⭐ (3)</button>
+          </div>
+          <input type="hidden" id="t-stars" value="5" />
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="addTestimonial()">💾 إضافة التقييم</button>
+        </div>
+      </div>
+
+      <!-- Testimonials List -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📋 التقييمات الحالية</span>
+          <button class="btn" style="font-size:.8rem;padding:6px 14px" onclick="resetTestimonials()">🔄 استعادة الافتراضية</button>
+        </div>
+        <div id="testimonials-list" style="display:flex;flex-direction:column;gap:12px;margin-top:4px"></div>
+      </div>
+    </section>
+
+    <section class="tab-section" id="tab-settings">
+      <p class="page-title">إعدادات المتجر ⚙️</p>
+      <p class="page-sub">تخصيص محتوى الموقع</p>
+
+      <!-- Section Images -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🖼️ صور الأقسام الأربعة</span></div>
+        <p style="font-size:.88rem;color:var(--text-mid);margin-bottom:18px">
+          اختاري صورة بانر لكل قسم — ستظهر كغلاف في أعلى القسم. ارفعي الصورة أولاً ثم اختاريها من المرفوعات.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:6px">💄 مكياج (Makeup)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" class="inp" id="sec-img-makeup" placeholder="/assets/makeup-banner.jpg" style="flex:1" />
+              <button class="btn" onclick="openImgPicker('sec-img-makeup')" style="white-space:nowrap;font-size:.82rem;padding:8px 12px">🖼️ اختر</button>
+            </div>
+            <div id="prev-sec-img-makeup" style="margin-top:6px;display:none"><img style="height:60px;border-radius:8px;object-fit:cover;width:100%;max-width:260px" /></div>
+          </div>
+          <div>
+            <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:6px">🌿 عناية بالبشرة (Skincare)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" class="inp" id="sec-img-skincare" placeholder="/assets/skincare-banner.jpg" style="flex:1" />
+              <button class="btn" onclick="openImgPicker('sec-img-skincare')" style="white-space:nowrap;font-size:.82rem;padding:8px 12px">🖼️ اختر</button>
+            </div>
+            <div id="prev-sec-img-skincare" style="margin-top:6px;display:none"><img style="height:60px;border-radius:8px;object-fit:cover;width:100%;max-width:260px" /></div>
+          </div>
+          <div>
+            <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:6px">💊 فيتامينات (Vitamins)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" class="inp" id="sec-img-vitamins" placeholder="/assets/vitamins-banner.jpg" style="flex:1" />
+              <button class="btn" onclick="openImgPicker('sec-img-vitamins')" style="white-space:nowrap;font-size:.82rem;padding:8px 12px">🖼️ اختر</button>
+            </div>
+            <div id="prev-sec-img-vitamins" style="margin-top:6px;display:none"><img style="height:60px;border-radius:8px;object-fit:cover;width:100%;max-width:260px" /></div>
+          </div>
+          <div>
+            <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:6px">🧴 عناية شخصية (Personal)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" class="inp" id="sec-img-personal" placeholder="/assets/personal-banner.jpg" style="flex:1" />
+              <button class="btn" onclick="openImgPicker('sec-img-personal')" style="white-space:nowrap;font-size:.82rem;padding:8px 12px">🖼️ اختر</button>
+            </div>
+            <div id="prev-sec-img-personal" style="margin-top:6px;display:none"><img style="height:60px;border-radius:8px;object-fit:cover;width:100%;max-width:260px" /></div>
+          </div>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="saveSectionImages()">💾 حفظ صور الأقسام</button>
+          <button class="btn" onclick="loadSectionImages()" style="font-size:.85rem">🔄 تحميل المحفوظة</button>
+        </div>
+        <div id="section-img-preview" style="display:none;margin-top:14px;padding:12px;background:#f5edf3;border-radius:10px;font-size:.85rem;color:var(--text-mid)"></div>
+      </div>
+
+      <!-- Announcement -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">📢 شريط الإعلانات</span></div>
+        <div class="announce-wrap">
+          <textarea class="inp" id="announce-text" rows="3" style="flex:1"></textarea>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn btn-primary" onclick="saveAnnouncement()">💾 حفظ الإعلان</button>
+        </div>
+      </div>
+
+      <!-- Hero Config -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🦸 إعدادات الهيرو الرئيسي</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>شارة صغيرة (Badge)</label>
+            <input type="text" class="inp" id="hero-badge" placeholder="New Arrivals · وصل جديد 🌟" />
+          </div>
+          <div class="form-group">
+            <label>العنوان الرئيسي</label>
+            <input type="text" class="inp" id="hero-headline" placeholder="جمالك، بلمسة فرق" />
+          </div>
+          <div class="form-group">
+            <label>نص زر 1</label>
+            <input type="text" class="inp" id="hero-cta1" placeholder="تسوّقي الآن" />
+          </div>
+          <div class="form-group">
+            <label>نص زر 2</label>
+            <input type="text" class="inp" id="hero-cta2" placeholder="استكشفي الفئات" />
+          </div>
+        </div>
+        <div style="margin-top:18px">
+          <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:6px">🖼️ صورة خلفية الهيرو</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="text" class="inp" id="hero-bg-img" placeholder="/assets/hero-bg-hq.webp" style="flex:1" />
+            <button class="btn" onclick="openImgPicker('hero-bg-img')" style="white-space:nowrap;font-size:.82rem;padding:8px 12px">🖼️ اختر</button>
+          </div>
+          <div id="prev-hero-bg-img" style="margin-top:8px;display:none">
+            <img style="width:100%;max-height:120px;object-fit:cover;border-radius:10px" />
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="saveHeroConfig()">💾 حفظ إعدادات الهيرو</button>
+        </div>
+        <div class="hero-preview-bar" id="hero-preview" style="display:none">
+          <strong>معاينة: </strong><span id="hero-preview-text"></span>
+        </div>
+      </div>
+
+      <!-- Button Color -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🎨 لون الأزرار</span></div>
+        <p style="font-size:.88rem;color:var(--text-mid);margin-bottom:18px">اختاري لون الأزرار الرئيسية في جميع أنحاء الموقع — يُطبَّق فوراً عند الحفظ.</p>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div>
+            <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:8px">لون الزر</label>
+            <div style="display:flex;align-items:center;gap:10px">
+              <input type="color" id="btn-color-picker" value="#7B2D8B" style="width:52px;height:44px;border:2px solid #e8e0f0;border-radius:10px;cursor:pointer;padding:2px" />
+              <input type="text" id="btn-color-hex" class="inp" value="#7B2D8B" placeholder="#7B2D8B" style="width:110px;font-family:monospace" />
+            </div>
+          </div>
+          <div>
+            <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:8px">معاينة</label>
+            <button id="btn-color-preview" class="btn btn-primary" style="pointer-events:none;font-size:.85rem;padding:10px 20px">زر رئيسي</button>
+          </div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+          <span onclick="setBtnColor('#7B2D8B')" style="width:28px;height:28px;background:#7B2D8B;border-radius:50%;cursor:pointer;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1.5px #ccc" title="بنفسجي"></span>
+          <span onclick="setBtnColor('#C9406A')" style="width:28px;height:28px;background:#C9406A;border-radius:50%;cursor:pointer;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1.5px #ccc" title="وردي غامق"></span>
+          <span onclick="setBtnColor('#1a6b2a')" style="width:28px;height:28px;background:#1a6b2a;border-radius:50%;cursor:pointer;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1.5px #ccc" title="أخضر"></span>
+          <span onclick="setBtnColor('#1a4fa0')" style="width:28px;height:28px;background:#1a4fa0;border-radius:50%;cursor:pointer;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1.5px #ccc" title="أزرق"></span>
+          <span onclick="setBtnColor('#b05c00')" style="width:28px;height:28px;background:#b05c00;border-radius:50%;cursor:pointer;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1.5px #ccc" title="برتقالي"></span>
+          <span onclick="setBtnColor('#222222')" style="width:28px;height:28px;background:#222222;border-radius:50%;cursor:pointer;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1.5px #ccc" title="أسود"></span>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="saveBtnColor()">💾 حفظ لون الأزرار</button>
+        </div>
+      </div>
+
+      <!-- Image Upload -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🖼️ رفع الصور</span></div>
+        <p style="font-size:.88rem;color:var(--text-mid);margin-bottom:16px">
+          اختاري صورة واحدة أو أكثر من جهازك — تُحفظ مباشرةً في مجلد <code>assets/</code> وتصبح جاهزة للاستخدام فوراً.
+        </p>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="img-file-input" accept="image/*" multiple style="display:none" />
+          <div class="upload-icon">📁</div>
+          <p class="upload-label">اضغطي لاختيار صورة أو أكثر</p>
+          <p style="font-size:.8rem;color:var(--text-mid);margin-top:4px">JPG · PNG · WEBP · GIF · يمكنك اختيار أكثر من صورة</p>
+          <button class="btn btn-primary" onclick="document.getElementById('img-file-input').click()" style="margin-top:14px">اختيار الصور</button>
+        </div>
+        <div id="upload-preview-area" style="display:none;margin-top:18px">
+          <div id="upload-preview-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-bottom:14px"></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="doUploadImages()" id="upload-submit-btn">💾 رفع وحفظ الكل</button>
+            <button class="btn" onclick="cancelUpload()" style="font-size:.85rem">إلغاء</button>
+            <span id="upload-count-label" style="font-size:.85rem;color:var(--text-mid)"></span>
+          </div>
+        </div>
+        <div id="upload-progress-bar" style="display:none;margin-top:10px">
+          <div style="background:#eee;border-radius:50px;height:8px;overflow:hidden">
+            <div id="upload-progress-fill" style="height:100%;background:var(--plum);width:0%;transition:width .3s ease;border-radius:50px"></div>
+          </div>
+          <p id="upload-progress-text" style="font-size:.82rem;color:var(--text-mid);margin-top:6px;text-align:center"></p>
+        </div>
+        <div id="upload-result" style="display:none;margin-top:14px;padding:14px;border-radius:12px;background:#f0fff0;border:1px solid #4caf50">
+          <p id="upload-result-msg" style="color:#2e7d32;font-weight:600;margin-bottom:6px"></p>
+        </div>
+
+        <!-- Gallery -->
+        <div style="margin-top:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <strong style="color:var(--plum)">الصور المرفوعة</strong>
+            <button class="btn" onclick="loadAssets()" style="font-size:.8rem;padding:5px 12px">🔄 تحديث</button>
+          </div>
+          <div id="assets-gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px"></div>
+        </div>
+      </div>
+
+      <!-- Admin Password -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🔐 تغيير كلمة سر لوحة التحكم</span></div>
+        <p style="font-size:.88rem;color:var(--text-mid);margin-bottom:16px">غيّري كلمة السر المستخدمة لدخول لوحة التحكم.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>رقم الهاتف الحالي</label>
+            <input type="text" class="inp" id="admin-curr-phone" value="0598191235" dir="ltr" />
+          </div>
+          <div class="form-group">
+            <label>كلمة السر الحالية</label>
+            <input type="password" class="inp" id="admin-curr-pass" dir="ltr" />
+          </div>
+          <div class="form-group">
+            <label>كلمة السر الجديدة</label>
+            <input type="password" class="inp" id="admin-new-pass" dir="ltr" />
+          </div>
+          <div class="form-group">
+            <label>تأكيد كلمة السر الجديدة</label>
+            <input type="password" class="inp" id="admin-confirm-pass" dir="ltr" />
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn btn-primary" onclick="saveAdminPassword()">🔐 حفظ كلمة السر</button>
+          <span id="admin-pass-msg" style="margin-right:12px;font-size:.85rem"></span>
+        </div>
+      </div>
+
+      <!-- WhatsApp -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">📱 رقم واتساب المتجر</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>رقم الهاتف (بدون + مثل: 972500000000)</label>
+            <input type="text" class="inp" id="wa-number" placeholder="972500000000" />
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn btn-primary" onclick="saveWhatsapp()">💾 حفظ الرقم</button>
+        </div>
+      </div>
+
+      <!-- Social Media Links -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">📲 روابط السوشيال ميديا</span></div>
+        <p style="font-size:.88rem;color:var(--text-mid);margin-bottom:16px">الروابط ستظهر في فوتر الموقع. اتركيها فارغة لإخفاء الأيقونة.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>🟣 رابط إنستقرام</label>
+            <input type="url" class="inp" id="social-ig" placeholder="https://instagram.com/your_account" />
+          </div>
+          <div class="form-group">
+            <label>🔵 رابط فيسبوك</label>
+            <input type="url" class="inp" id="social-fb" placeholder="https://facebook.com/your_page" />
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="saveSocialLinks()">💾 حفظ الروابط</button>
+        </div>
+        <div id="social-preview" style="display:none;margin-top:14px;padding:14px;background:#f5edf3;border-radius:10px;font-size:.88rem">
+          <strong>✅ الروابط المحفوظة:</strong>
+          <div id="social-preview-text" style="margin-top:6px;color:var(--text-mid);word-break:break-all"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ PRODUCT MODAL ═══ -->
+<div class="modal-overlay hidden" id="product-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="product-modal-title">إضافة منتج جديد</span>
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>اسم المنتج بالعربي *</label>
+        <input type="text" class="inp" id="p-nameAR" placeholder="مثل: كريم ترطيب" />
+      </div>
+      <div class="form-group">
+        <label>اسم المنتج بالإنجليزي</label>
+        <input type="text" class="inp" id="p-nameEN" placeholder="e.g. Moisturizing Cream" />
+      </div>
+      <div class="form-group">
+        <label>السعر (₪) *</label>
+        <input type="number" class="inp" id="p-price" placeholder="0" min="0" />
+      </div>
+      <div class="form-group">
+        <label>الكمية في المخزون *</label>
+        <input type="number" class="inp" id="p-stock" placeholder="0" min="0" />
+      </div>
+      <div class="form-group">
+        <label>الفئة *</label>
+        <select class="inp" id="p-category">
+          <option value="skincare">عناية بالبشرة</option>
+          <option value="makeup">مكياج</option>
+          <option value="personal">عناية شخصية</option>
+          <option value="vitamins">فيتامينات</option>
+          <option value="scarves">شالات وأوشحة</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>صورة المنتج</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="text" class="inp" id="p-image" placeholder="رابط الصورة أو ارفعي من الجهاز..." style="flex:1;min-width:180px" />
+          <button type="button" class="btn btn-ghost" onclick="triggerProductImgUpload()" style="white-space:nowrap;padding:8px 14px;font-size:.85rem">📁 رفع</button>
+          <button type="button" class="btn btn-ghost" onclick="openImgPicker('p-image')" style="white-space:nowrap;padding:8px 14px;font-size:.85rem">🖼️ اختاري</button>
+        </div>
+        <input type="file" id="p-image-file" accept="image/*" style="display:none" onchange="uploadProductImage(this)" />
+        <div id="prev-p-image" style="display:none;margin-top:10px">
+          <img src="" alt="معاينة" style="width:100px;height:100px;object-fit:cover;border-radius:10px;border:2px solid #f0e0f0" />
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>وصف المنتج</label>
+        <textarea class="inp" id="p-desc" placeholder="اكتبي وصفاً للمنتج..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="p-featured" style="margin-left:6px" />
+          منتج مميز
+        </label>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="p-bestseller" style="margin-left:6px" />
+          الأكثر مبيعاً
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeProductModal()">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveProduct()">💾 حفظ المنتج</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ORDER DETAIL MODAL ═══ -->
+<div class="modal-overlay hidden" id="order-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="order-modal-title">تفاصيل الطلب</span>
+      <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    </div>
+    <div id="order-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeOrderModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast & Confirm -->
+<div id="admin-toast"></div>
+<div id="admin-confirm">
+  <div class="confirm-box">
+    <p id="confirm-msg">هل أنتِ متأكدة؟</p>
+    <div class="confirm-btns">
+      <button class="btn btn-danger" id="confirm-yes">نعم، احذفي</button>
+      <button class="btn btn-ghost" id="confirm-no">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Supabase Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = window.SUPABASE_URL || '';
+  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+</script>
+<script src="js/supabase-client.js"></script>
+<script src="js/glow-data.js"></script>
+<script>
+  'use strict';
+
+  function apiHeaders(extra) {
+    return { 'Content-Type': 'application/json', ...extra };
+  }
+
+  let editingProductId = null;
+  let toastTimer = null;
+
+  /* ── Toast ── */
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('admin-toast');
+    el.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '❌ ' : '⚠️ ') + msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  /* ── Confirm Dialog ── */
+  function adminConfirm(msg) {
+    return new Promise(resolve => {
+      document.getElementById('confirm-msg').textContent = msg;
+      const overlay = document.getElementById('admin-confirm');
+      overlay.classList.add('show');
+      function cleanup() { overlay.classList.remove('show'); }
+      document.getElementById('confirm-yes').onclick = () => { cleanup(); resolve(true); };
+      document.getElementById('confirm-no').onclick  = () => { cleanup(); resolve(false); };
+    });
+  }
+
+  /* ══ AUTH ══ */
+  function doAdminLogin() {
+    const id    = document.getElementById('ag-phone').value.trim();
+    const pass  = document.getElementById('ag-pass').value.trim();
+    if (!id || !pass) {
+      document.getElementById('auth-error').style.display = 'block';
+      document.getElementById('auth-error').textContent = '⚠️ أدخلي البيانات المطلوبة';
+      return;
+    }
+    const users = DB.getUsers();
+    const found = users.find(u => (u.phone === id || u.email === id) && u.pass === pass);
+    if (found && found.role === 'admin') {
+      DB.setCurrentUser(found);
+      document.getElementById('auth-gate').style.display = 'none';
+      initAdmin();
+    } else {
+      document.getElementById('auth-error').style.display = 'block';
+      document.getElementById('auth-error').textContent = '❌ بيانات الدخول غير صحيحة';
+    }
+  }
+
+  function adminLogout() {
+    DB.logoutUser();
+    location.reload();
+  }
+
+  function saveAdminPassword() {
+    const currPhone = document.getElementById('admin-curr-phone').value.trim();
+    const currPass  = document.getElementById('admin-curr-pass').value.trim();
+    const newPass   = document.getElementById('admin-new-pass').value.trim();
+    const confirm   = document.getElementById('admin-confirm-pass').value.trim();
+    const msgEl     = document.getElementById('admin-pass-msg');
+
+    const users = DB.getUsers();
+    const admin = users.find(u => u.role === 'admin');
+    if (!admin || currPass !== admin.pass) {
+      msgEl.style.color = '#c0392b'; msgEl.textContent = '❌ كلمة السر الحالية غير صحيحة';
+      return;
+    }
+    if (!newPass || newPass.length < 4) {
+      msgEl.style.color = '#c0392b'; msgEl.textContent = '❌ كلمة السر الجديدة قصيرة جداً (4 أحرف على الأقل)';
+      return;
+    }
+    if (newPass !== confirm) {
+      msgEl.style.color = '#c0392b'; msgEl.textContent = '❌ كلمة السر الجديدة وتأكيدها غير متطابقين';
+      return;
+    }
+    admin.pass = newPass;
+    DB.saveUser(admin);
+    document.getElementById('admin-curr-pass').value = '';
+    document.getElementById('admin-new-pass').value = '';
+    document.getElementById('admin-confirm-pass').value = '';
+    msgEl.style.color = '#2e7d32';
+    msgEl.textContent = '✅ تم حفظ كلمة السر الجديدة بنجاح!';
+    setTimeout(() => { msgEl.textContent = ''; }, 3000);
+  }
+
+  /* ══ TABS ══ */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.querySelector('[data-tab="' + name + '"]').classList.add('active');
+
+    if (name === 'products')  renderProducts();
+    if (name === 'orders')    renderOrders();
+    if (name === 'users')     renderUsers();
+    if (name === 'settings')      { loadSettings(); loadSectionImages(); loadBtnColor(); }
+    if (name === 'testimonials')  renderTestimonialsList();
+    if (name === 'dashboard')     renderDashboard();
+  }
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => switchTab(item.dataset.tab));
+  });
+
+  /* ══ INIT ══ */
+  function initAdmin() {
+    renderDashboard();
+  }
+
+  /* ══ DASHBOARD ══ */
+  function renderDashboard() {
+    const products = DB.getProducts();
+    const orders   = DB.getOrders();
+    const users    = DB.getUsers();
+    const revenue  = orders.reduce((s, o) => s + (o.total || 0), 0);
+
+    document.getElementById('stat-total-products').textContent = products.length;
+    document.getElementById('stat-total-orders').textContent   = orders.length;
+    document.getElementById('stat-total-revenue').textContent  = revenue.toFixed(0) + ' ₪';
+    document.getElementById('stat-total-users').textContent    = users.length;
+
+    const recent = [...orders].reverse().slice(0, 5);
+    const tbody = recent.length ? `<table style="width:100%;border-collapse:collapse;font-size:.88rem">
+      <thead><tr>
+        <th style="background:#f5edf3;padding:10px 14px;text-align:right;color:#6B2D4E">رقم الطلب</th>
+        <th style="background:#f5edf3;padding:10px 14px;text-align:right;color:#6B2D4E">العميل</th>
+        <th style="background:#f5edf3;padding:10px 14px;text-align:right;color:#6B2D4E">المبلغ</th>
+        <th style="background:#f5edf3;padding:10px 14px;text-align:right;color:#6B2D4E">الحالة</th>
+      </tr></thead>
+      <tbody>${recent.map(o => `<tr>
+        <td style="padding:10px 14px;border-bottom:1px solid #f0e6ee">${o.id || '—'}</td>
+        <td style="padding:10px 14px;border-bottom:1px solid #f0e6ee">${o.name || '—'}</td>
+        <td style="padding:10px 14px;border-bottom:1px solid #f0e6ee">${(o.total||0).toFixed(0)} ₪</td>
+        <td style="padding:10px 14px;border-bottom:1px solid #f0e6ee">${statusBadge(o.status||'جديد')}</td>
+      </tr>`).join('')}</tbody>
+    </table>` : '<p style="text-align:center;padding:30px;color:#9a6b7d">لا توجد طلبات بعد</p>';
+    document.getElementById('recent-orders-table').innerHTML = tbody;
+  }
+
+  /* ══ PRODUCTS ══ */
+  function catLabel(c) {
+    return { skincare:'عناية بالبشرة', makeup:'مكياج', personal:'عناية شخصية', vitamins:'فيتامينات', scarves:'شالات' }[c] || c;
+  }
+
+  function renderProducts() {
+    const q      = (document.getElementById('product-search').value || '').toLowerCase();
+    const cat    = document.getElementById('product-cat-filter').value;
+    let products = DB.getProducts().filter(p => {
+      const matchQ   = !q || p.nameAR.toLowerCase().includes(q) || (p.nameEN||'').toLowerCase().includes(q);
+      const matchCat = !cat || p.category === cat;
+      return matchQ && matchCat;
+    });
+
+    const tbody = document.getElementById('products-tbody');
+    if (!products.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#9a6b7d">لا توجد منتجات</td></tr>';
+      return;
+    }
+    tbody.innerHTML = products.map(p => `
+      <tr>
+        <td><img src="${(p.images||[])[0] || '/assets/test-product.jpeg'}" class="product-thumb" onerror="this.src='/assets/test-product.jpeg'" /></td>
+        <td><strong>${p.nameAR}</strong><br><span style="font-size:.8rem;color:#9a6b7d">${p.nameEN||''}</span></td>
+        <td>${catLabel(p.category)}</td>
+        <td><strong>${p.price} ₪</strong></td>
+        <td>${p.stock > 10 ? `<span class="badge badge-green">${p.stock}</span>` : p.stock > 0 ? `<span class="badge badge-orange">${p.stock}</span>` : '<span class="badge badge-red">نفذ</span>'}</td>
+        <td>
+          ${p.featured  ? '<span class="badge badge-blue">مميز</span> ' : ''}
+          ${p.bestseller? '<span class="badge badge-green">الأكثر مبيعاً</span>' : ''}
+        </td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-ghost btn-sm" onclick="openEditProduct('${p.id}')">✏️ تعديل</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')" style="margin-right:6px">🗑️ حذف</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function openAddProduct() {
+    editingProductId = null;
+    document.getElementById('product-modal-title').textContent = 'إضافة منتج جديد';
+    ['p-nameAR','p-nameEN','p-price','p-stock','p-image','p-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('p-category').value = 'skincare';
+    document.getElementById('p-featured').checked = false;
+    document.getElementById('p-bestseller').checked = false;
+    updateInputPreview('p-image', '');
+    document.getElementById('product-modal').classList.remove('hidden');
+  }
+
+  function openEditProduct(id) {
+    const products = DB.getProducts();
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    editingProductId = id;
+    document.getElementById('product-modal-title').textContent = 'تعديل المنتج';
+    document.getElementById('p-nameAR').value    = p.nameAR || '';
+    document.getElementById('p-nameEN').value    = p.nameEN || '';
+    document.getElementById('p-price').value     = p.price || 0;
+    document.getElementById('p-stock').value     = p.stock || 0;
+    document.getElementById('p-category').value  = p.category || 'skincare';
+    document.getElementById('p-image').value     = (p.images||[''])[0] || '';
+    document.getElementById('p-desc').value      = p.descriptionAR || '';
+    updateInputPreview('p-image', (p.images||[''])[0] || '');
+    document.getElementById('p-featured').checked   = !!p.featured;
+    document.getElementById('p-bestseller').checked = !!p.bestseller;
+    document.getElementById('product-modal').classList.remove('hidden');
+  }
+
+  function closeProductModal() {
+    document.getElementById('product-modal').classList.add('hidden');
+  }
+
+  function saveProduct() {
+    const nameAR = document.getElementById('p-nameAR').value.trim();
+    const price  = parseFloat(document.getElementById('p-price').value);
+    const stock  = parseInt(document.getElementById('p-stock').value);
+    if (!nameAR || isNaN(price) || isNaN(stock)) {
+      toast('يرجى تعبئة الحقول المطلوبة (الاسم، السعر، المخزون)', 'warn');
+      return;
+    }
+    const products = DB.getProducts();
+    const img = document.getElementById('p-image').value.trim();
+    const product = {
+      id:            editingProductId || ('prod-' + Date.now()),
+      nameAR,
+      nameEN:        document.getElementById('p-nameEN').value.trim(),
+      price,
+      stock,
+      category:      document.getElementById('p-category').value,
+      images:        img ? [img] : ['/assets/test-product.jpeg'],
+      descriptionAR: document.getElementById('p-desc').value.trim(),
+      featured:      document.getElementById('p-featured').checked,
+      bestseller:    document.getElementById('p-bestseller').checked,
+    };
+
+    if (editingProductId) {
+      const idx = products.findIndex(x => x.id === editingProductId);
+      if (idx !== -1) products[idx] = product;
+    } else {
+      products.push(product);
+    }
+    DB.saveProducts(products);
+    closeProductModal();
+    renderProducts();
+    toast(editingProductId ? 'تم تحديث المنتج بنجاح' : 'تمت إضافة المنتج بنجاح');
+  }
+
+  async function deleteProduct(id) {
+    const ok = await adminConfirm('هل أنتِ متأكدة من حذف هذا المنتج؟');
+    if (!ok) return;
+    const products = DB.getProducts().filter(p => p.id !== id);
+    DB.saveProducts(products);
+    renderProducts();
+    toast('تم حذف المنتج', 'error');
+  }
+
+  /* ══ ORDERS ══ */
+  function statusBadge(s) {
+    const map = { 'جديد':'badge-blue', 'قيد التجهيز':'badge-orange', 'تم الشحن':'badge-green', 'مكتمل':'badge-green', 'ملغي':'badge-red' };
+    return `<span class="badge ${map[s]||'badge-blue'}">${s}</span>`;
+  }
+
+  function renderOrders() {
+    const q      = (document.getElementById('order-search').value || '').toLowerCase();
+    const status = document.getElementById('order-status-filter').value;
+    let orders   = DB.getOrders().filter(o => {
+      const matchQ = !q || (o.id||'').toLowerCase().includes(q) || (o.name||'').toLowerCase().includes(q) || (o.phone||'').includes(q);
+      const matchS = !status || (o.status||'جديد') === status;
+      return matchQ && matchS;
+    }).reverse();
+
+    document.getElementById('orders-count').textContent = orders.length + ' طلب';
+    const tbody = document.getElementById('orders-tbody');
+    const noMsg = document.getElementById('no-orders-msg');
+
+    if (!orders.length) {
+      tbody.innerHTML = '';
+      noMsg.style.display = 'block';
+      return;
+    }
+    noMsg.style.display = 'none';
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td><strong>${o.id||'—'}</strong></td>
+        <td>${o.name||'—'}</td>
+        <td dir="ltr">${o.phone||'—'}</td>
+        <td><strong>${(o.total||0).toFixed(0)} ₪</strong></td>
+        <td>${statusBadge(o.status||'جديد')}</td>
+        <td style="font-size:.82rem">${o.date ? new Date(o.date).toLocaleDateString('ar') : '—'}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-ghost btn-sm" onclick="viewOrder('${o.id}')">👁️ عرض</button>
+          <select class="inp" style="font-size:.8rem;padding:4px 8px;width:auto;margin-right:6px" onchange="updateOrderStatus('${o.id}', this.value)">
+            ${['جديد','قيد التجهيز','تم الشحن','مكتمل','ملغي'].map(s => `<option ${(o.status||'جديد')===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function updateOrderStatus(id, newStatus) {
+    const orders = DB.getOrders();
+    const o = orders.find(x => x.id === id);
+    if (o) { o.status = newStatus; DB.saveOrders(orders); }
+  }
+
+  function viewOrder(id) {
+    const o = DB.getOrders().find(x => x.id === id);
+    if (!o) return;
+    const items = (o.items||[]).map(i => `<li>• ${i.nameAR||i.name||'منتج'} × ${i.qty||1} — ${((i.price||0)*(i.qty||1)).toFixed(0)} ₪</li>`).join('');
+    document.getElementById('order-modal-title').textContent = 'طلب رقم: ' + o.id;
+    document.getElementById('order-modal-body').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div><strong>الاسم:</strong> ${o.name||'—'}</div>
+        <div><strong>الهاتف:</strong> <span dir="ltr">${o.phone||'—'}</span></div>
+        <div><strong>العنوان:</strong> ${o.address||'—'}</div>
+        <div><strong>المدينة:</strong> ${o.city||'—'}</div>
+        <div><strong>الملاحظات:</strong> ${o.notes||'لا يوجد'}</div>
+        <div><strong>التاريخ:</strong> ${o.date ? new Date(o.date).toLocaleString('ar') : '—'}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #f0e6ee;margin-bottom:16px"/>
+      <p style="font-weight:700;margin-bottom:10px">المنتجات المطلوبة:</p>
+      <ul class="order-items-list">${items || '<li>لا توجد منتجات</li>'}</ul>
+      <div style="text-align:left;margin-top:16px;font-size:1.1rem">
+        <strong>الإجمالي: ${(o.total||0).toFixed(0)} ₪</strong>
+      </div>
+    `;
+    document.getElementById('order-modal').classList.remove('hidden');
+  }
+
+  function closeOrderModal() {
+    document.getElementById('order-modal').classList.add('hidden');
+  }
+
+  /* ══ USERS ══ */
+  function renderUsers() {
+    const users = DB.getUsers();
+    const noMsg = document.getElementById('no-users-msg');
+    const tbody = document.getElementById('users-tbody');
+    if (!users.length) {
+      tbody.innerHTML = '';
+      noMsg.style.display = 'block';
+      return;
+    }
+    noMsg.style.display = 'none';
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.name||'—'}</td>
+        <td dir="ltr">${u.phone||'—'}</td>
+        <td>${u.email||'—'}</td>
+        <td>${u.role==='admin' ? '<span class="badge badge-blue">مدير</span>' : '<span class="badge badge-green">عميل</span>'}</td>
+      </tr>
+    `).join('');
+  }
+
+  /* ══ SETTINGS ══ */
+  function loadSettings() {
+    document.getElementById('announce-text').value = DB.getAnnouncement();
+    const hero = DB.getHeroConfig() || {};
+    document.getElementById('hero-badge').value    = hero.badge    || '';
+    document.getElementById('hero-headline').value = hero.headline || '';
+    document.getElementById('hero-cta1').value     = hero.cta1     || '';
+    document.getElementById('hero-cta2').value     = hero.cta2     || '';
+    const heroBgImg = localStorage.getItem('bz_hero_bg_img') || '';
+    document.getElementById('hero-bg-img').value = heroBgImg;
+    if (heroBgImg) updateInputPreview('hero-bg-img', heroBgImg);
+    const waStored = localStorage.getItem('bz_whatsapp') || '972500000000';
+    document.getElementById('wa-number').value = waStored;
+    const social = DB.getSocialLinks();
+    document.getElementById('social-ig').value = social.instagram || '';
+    document.getElementById('social-fb').value = social.facebook  || '';
+  }
+
+  function saveAnnouncement() {
+    DB.saveAnnouncement(document.getElementById('announce-text').value.trim());
+    toast('تم حفظ الإعلان بنجاح');
+  }
+
+  function saveHeroConfig() {
+    const config = {
+      badge:    document.getElementById('hero-badge').value.trim(),
+      headline: document.getElementById('hero-headline').value.trim(),
+      cta1:     document.getElementById('hero-cta1').value.trim(),
+      cta2:     document.getElementById('hero-cta2').value.trim(),
+    };
+    DB.saveHeroConfig(config);
+    const heroBgImg = document.getElementById('hero-bg-img').value.trim();
+    if (heroBgImg) localStorage.setItem('bz_hero_bg_img', heroBgImg);
+    else localStorage.removeItem('bz_hero_bg_img');
+    const prev = document.getElementById('hero-preview');
+    document.getElementById('hero-preview-text').textContent = config.headline;
+    prev.style.display = 'block';
+    toast('تم حفظ إعدادات الهيرو');
+  }
+
+  function saveWhatsapp() {
+    const wa = document.getElementById('wa-number').value.trim();
+    localStorage.setItem('bz_whatsapp', wa);
+    const links = DB.getSocialLinks();
+    links.whatsapp = wa;
+    DB.saveSocialLinks(links);
+    toast('تم حفظ رقم الواتساب');
+  }
+
+  /* ══ TESTIMONIALS ══ */
+  let selectedStars = 5;
+
+  function pickStar(val) {
+    selectedStars = val;
+    document.getElementById('t-stars').value = val;
+    document.querySelectorAll('.star-btn').forEach(b => b.classList.toggle('active', +b.dataset.val === val));
+  }
+
+  function renderTestimonialsList() {
+    const list = DB.getTestimonials();
+    const container = document.getElementById('testimonials-list');
+    if (!container) return;
+    if (!list.length) {
+      container.innerHTML = '<p style="color:var(--text-mid);font-size:.9rem;padding:12px">لا يوجد تقييمات بعد.</p>';
+      return;
+    }
+    container.innerHTML = list.map((t, i) => `
+      <div class="testi-row" style="flex-direction:column;align-items:stretch;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div class="testi-avatar-sm">${t.letter || t.name.charAt(0)}</div>
+          <div class="testi-row-body" style="flex:1">
+            <div class="testi-row-stars">${'★'.repeat(t.stars || 5)}</div>
+            <p class="testi-row-text">"${t.text}"</p>
+            <p class="testi-row-meta">— ${t.name}، ${t.location}</p>
+          </div>
+          <button class="btn" style="padding:6px 12px;font-size:.78rem;color:#c0392b;border-color:#f5b7b1;flex-shrink:0" onclick="deleteTestimonial(${i})">🗑️</button>
+        </div>
+        <!-- Store Reply -->
+        <div style="background:#faf7ff;border-radius:10px;padding:10px;border:1px solid rgba(123,45,139,.15)">
+          <p style="font-size:.78rem;color:#7B2D8B;font-weight:700;margin-bottom:6px">💬 رد المتجر:</p>
+          <textarea id="reply-${i}" rows="2" class="inp" style="font-size:.85rem;border-radius:8px;resize:vertical"
+            placeholder="اكتبي رد المتجر على هذا الرأي...">${t.storeReply || ''}</textarea>
+          <button class="btn btn-primary" style="margin-top:8px;font-size:.8rem;padding:7px 16px"
+            onclick="saveReply(${i})">💾 حفظ الرد</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function saveReply(idx) {
+    const list = DB.getTestimonials();
+    const reply = document.getElementById('reply-' + idx)?.value.trim() || '';
+    list[idx].storeReply = reply;
+    DB.saveTestimonials(list);
+    toast('✅ تم حفظ رد المتجر');
+  }
+
+  function addTestimonial() {
+    const name = document.getElementById('t-name').value.trim();
+    const location = document.getElementById('t-location').value.trim();
+    const text = document.getElementById('t-text').value.trim();
+    const stars = +document.getElementById('t-stars').value || 5;
+    if (!name || !text) { toast('يرجى إدخال الاسم والنص على الأقل', 'warn'); return; }
+    const list = DB.getTestimonials();
+    list.push({ name, location: location || 'فلسطين', text, stars, letter: name.charAt(0) });
+    DB.saveTestimonials(list);
+    document.getElementById('t-name').value = '';
+    document.getElementById('t-location').value = '';
+    document.getElementById('t-text').value = '';
+    pickStar(5);
+    renderTestimonialsList();
+    toast('✅ تمت إضافة التقييم بنجاح');
+  }
+
+  function deleteTestimonial(idx) {
+    confirmDialog('هل تريدين حذف هذا التقييم؟', () => {
+      const list = DB.getTestimonials();
+      list.splice(idx, 1);
+      DB.saveTestimonials(list);
+      renderTestimonialsList();
+      toast('تم الحذف');
+    });
+  }
+
+  function resetTestimonials() {
+    confirmDialog('ستُستبدل كل التقييمات بالنسخة الافتراضية. هل أنتِ متأكدة؟', () => {
+      localStorage.removeItem('bz_testimonials');
+      renderTestimonialsList();
+      toast('تم استعادة التقييمات الافتراضية');
+    });
+  }
+
+  // ── Section Images ────────────────────────────────────
+  function saveSectionImages() {
+    const data = {
+      makeup:   document.getElementById('sec-img-makeup')?.value.trim()  || '',
+      skincare: document.getElementById('sec-img-skincare')?.value.trim() || '',
+      vitamins: document.getElementById('sec-img-vitamins')?.value.trim() || '',
+      personal: document.getElementById('sec-img-personal')?.value.trim() || ''
+    };
+    localStorage.setItem('bz_section_images', JSON.stringify(data));
+    const prev = document.getElementById('section-img-preview');
+    if (prev) {
+      prev.style.display = '';
+      const filled = Object.entries(data).filter(([,v]) => v).length;
+      prev.innerHTML = `✅ تم حفظ صور ${filled} قسم/أقسام`;
+    }
+    toast('✅ تم حفظ صور الأقسام');
+  }
+
+  function loadSectionImages() {
+    const raw = localStorage.getItem('bz_section_images');
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      ['makeup','skincare','vitamins','personal'].forEach(key => {
+        const el = document.getElementById('sec-img-' + key);
+        if (el) {
+          el.value = data[key] || '';
+          if (data[key]) updateInputPreview('sec-img-' + key, data[key]);
+        }
+      });
+    } catch(e) {}
+  }
+
+  function saveSocialLinks() {
+    const ig = document.getElementById('social-ig').value.trim();
+    const fb = document.getElementById('social-fb').value.trim();
+    const wa = document.getElementById('wa-number').value.trim() || DB.getSocialLinks().whatsapp;
+    DB.saveSocialLinks({ instagram: ig, facebook: fb, whatsapp: wa });
+    const prev = document.getElementById('social-preview');
+    const prevText = document.getElementById('social-preview-text');
+    let lines = [];
+    if (ig) lines.push('📸 إنستقرام: ' + ig);
+    if (fb) lines.push('👍 فيسبوك: ' + fb);
+    prevText.innerHTML = lines.length ? lines.join('<br>') : 'لم يتم إدخال أي روابط';
+    prev.style.display = 'block';
+    toast('تم حفظ روابط السوشيال ميديا');
+  }
+
+  /* ══ IMAGE UPLOAD (multi-file) ══ */
+  let pendingFiles = [];
+
+  function initUpload() {
+    const fileInput = document.getElementById('img-file-input');
+    const zone = document.getElementById('upload-zone');
+    if (!fileInput || !zone) return;
+
+    fileInput.addEventListener('change', e => {
+      const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+      if (files.length) showUploadPreviews(files);
+    });
+
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+      if (files.length) showUploadPreviews(files);
+    });
+  }
+
+  function showUploadPreviews(files) {
+    pendingFiles = files;
+    const grid = document.getElementById('upload-preview-grid');
+    const label = document.getElementById('upload-count-label');
+    grid.innerHTML = '';
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const thumb = document.createElement('div');
+        thumb.style.cssText = 'border-radius:10px;overflow:hidden;border:2px solid var(--border);position:relative';
+        thumb.innerHTML = `
+          <img src="${e.target.result}" alt="${file.name}"
+            style="width:100%;aspect-ratio:1;object-fit:cover;display:block" />
+          <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);
+            color:#fff;font-size:.62rem;padding:3px 5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">
+            ${file.name}
+          </div>`;
+        grid.appendChild(thumb);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    label.textContent = files.length + ' صورة جاهزة للرفع';
+    document.getElementById('upload-preview-area').style.display = '';
+    document.getElementById('upload-result').style.display = 'none';
+    document.getElementById('upload-progress-bar').style.display = 'none';
+  }
+
+  function cancelUpload() {
+    pendingFiles = [];
+    document.getElementById('upload-preview-area').style.display = 'none';
+    document.getElementById('upload-progress-bar').style.display = 'none';
+    document.getElementById('img-file-input').value = '';
+    document.getElementById('upload-preview-grid').innerHTML = '';
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function doUploadImages() {
+    if (!pendingFiles.length) return;
+    const btn = document.getElementById('upload-submit-btn');
+    const progressBar = document.getElementById('upload-progress-bar');
+    const progressFill = document.getElementById('upload-progress-fill');
+    const progressText = document.getElementById('upload-progress-text');
+
+    btn.disabled = true;
+    progressBar.style.display = '';
+    document.getElementById('upload-result').style.display = 'none';
+
+    let done = 0, failed = 0;
+    const total = pendingFiles.length;
+
+    for (const file of pendingFiles) {
+      try {
+        const dataUrl = await readFileAsDataURL(file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: apiHeaders(),
+          body: JSON.stringify({ filename: file.name, data: dataUrl, type: file.type })
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+        done++;
+      } catch(e) {
+        failed++;
+      }
+      const pct = Math.round(((done + failed) / total) * 100);
+      progressFill.style.width = pct + '%';
+      progressText.textContent = `${done + failed} / ${total} — ${pct}%`;
+    }
+
+    btn.disabled = false;
+    const resultEl = document.getElementById('upload-result');
+    const msgEl = document.getElementById('upload-result-msg');
+    resultEl.style.display = '';
+    msgEl.textContent = failed === 0
+      ? `✅ تم رفع جميع الصور (${done} صورة) بنجاح!`
+      : `✅ ${done} صورة ناجحة — ❌ ${failed} فشلت`;
+
+    pendingFiles = [];
+    document.getElementById('img-file-input').value = '';
+    document.getElementById('upload-preview-area').style.display = 'none';
+    loadAssets();
+    toast('تم رفع ' + done + ' صورة ✅');
+  }
+
+  async function loadAssets() {
+    try {
+      const res = await fetch('/api/assets');
+      const images = await res.json();
+      const gallery = document.getElementById('assets-gallery');
+      if (!gallery) return;
+      if (!images.length) {
+        gallery.innerHTML = '<p style="color:var(--text-mid);font-size:.85rem">لا توجد صور بعد</p>';
+        return;
+      }
+      gallery.innerHTML = images.map(img => `
+        <div class="asset-thumb" id="asset-${img.name}">
+          <img src="${img.url}" alt="${img.name}" loading="lazy" />
+          <div class="copy-url-btn" onclick="event.stopPropagation();navigator.clipboard.writeText('${img.url}').then(()=>toast('تم نسخ الرابط ✅'))">📋 نسخ</div>
+          <button onclick="deleteAsset('${img.name}')" style="position:absolute;top:4px;right:4px;background:rgba(192,57,43,.9);color:#fff;border:none;border-radius:6px;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0" title="حذف">✕</button>
+        </div>
+      `).join('');
+    } catch(e) { console.warn('loadAssets error', e); }
+  }
+
+  async function deleteAsset(name) {
+    confirmDialog('هل تريدين حذف هذه الصورة نهائياً؟', async () => {
+      try {
+        const res = await fetch('/api/delete/' + encodeURIComponent(name), { method: 'DELETE', headers: apiHeaders() });
+        const json = await res.json();
+        if (json.success) { toast('تم الحذف ✅'); loadAssets(); }
+        else toast('❌ فشل الحذف');
+      } catch(e) { toast('❌ خطأ في الحذف'); }
+    });
+  }
+
+  /* ══ BUTTON COLOR ══ */
+  function applyBtnColorToPage(hex) {
+    const shadow = shadeColor(hex, -35);
+    document.documentElement.style.setProperty('--btn-color', hex);
+    document.documentElement.style.setProperty('--btn-shadow-color', shadow);
+  }
+
+  function shadeColor(hex, pct) {
+    let r = parseInt(hex.slice(1,3),16);
+    let g = parseInt(hex.slice(3,5),16);
+    let b = parseInt(hex.slice(5,7),16);
+    r = Math.max(0, Math.min(255, r + Math.round(r * pct / 100)));
+    g = Math.max(0, Math.min(255, g + Math.round(g * pct / 100)));
+    b = Math.max(0, Math.min(255, b + Math.round(b * pct / 100)));
+    return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+  }
+
+  function setBtnColor(hex) {
+    document.getElementById('btn-color-picker').value = hex;
+    document.getElementById('btn-color-hex').value = hex;
+    applyBtnColorToPage(hex);
+  }
+
+  function saveBtnColor() {
+    const hex = document.getElementById('btn-color-hex').value.trim();
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) { toast('❌ لون غير صحيح، استخدمي صيغة #rrggbb'); return; }
+    localStorage.setItem('bz_btn_color', hex);
+    applyBtnColorToPage(hex);
+    toast('✅ تم حفظ لون الأزرار');
+  }
+
+  function loadBtnColor() {
+    const saved = localStorage.getItem('bz_btn_color');
+    if (saved) {
+      document.getElementById('btn-color-picker').value = saved;
+      document.getElementById('btn-color-hex').value = saved;
+      applyBtnColorToPage(saved);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const picker = document.getElementById('btn-color-picker');
+    const hexInput = document.getElementById('btn-color-hex');
+    if (picker) {
+      picker.addEventListener('input', e => {
+        const hex = e.target.value;
+        hexInput.value = hex;
+        applyBtnColorToPage(hex);
+      });
+    }
+    if (hexInput) {
+      hexInput.addEventListener('input', e => {
+        const hex = e.target.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
+          picker.value = hex;
+          applyBtnColorToPage(hex);
+        }
+      });
+    }
+    loadBtnColor();
+  });
+
+  /* ══ IMAGE PICKER MODAL ══ */
+  let _pickerTarget = null;
+
+  function openImgPicker(inputId) {
+    _pickerTarget = inputId;
+    const modal = document.getElementById('img-picker-modal');
+    modal.style.display = 'flex';
+    loadPickerImages();
+  }
+
+  function closeImgPicker() {
+    document.getElementById('img-picker-modal').style.display = 'none';
+    _pickerTarget = null;
+  }
+
+  async function loadPickerImages() {
+    const grid = document.getElementById('img-picker-grid');
+    grid.innerHTML = '<p style="color:var(--text-mid);font-size:.85rem;padding:20px">جارٍ التحميل...</p>';
+    try {
+      const res = await fetch('/api/assets');
+      const images = await res.json();
+      if (!images.length) {
+        grid.innerHTML = '<p style="color:var(--text-mid);font-size:.85rem;padding:20px;text-align:center">لا توجد صور مرفوعة بعد.<br>ارفعي صوراً من قسم رفع الصور أولاً.</p>';
+        return;
+      }
+      grid.innerHTML = images.map(img => `
+        <div onclick="pickImage('${img.url}')" style="cursor:pointer;border-radius:10px;overflow:hidden;aspect-ratio:3/2;position:relative;border:2px solid transparent;transition:border-color .2s" class="picker-thumb">
+          <img src="${img.url}" alt="${img.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover" />
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .2s;display:flex;align-items:center;justify-content:center;font-size:1.5rem;opacity:0" class="picker-thumb-overlay">✅</div>
+        </div>
+      `).join('');
+    } catch(e) {
+      grid.innerHTML = '<p style="color:var(--text-mid);font-size:.85rem;padding:20px">تعذّر تحميل الصور.</p>';
+    }
+  }
+
+  function pickImage(url) {
+    if (!_pickerTarget) return;
+    const input = document.getElementById(_pickerTarget);
+    if (input) {
+      input.value = url;
+      input.dispatchEvent(new Event('input'));
+      updateInputPreview(_pickerTarget, url);
+    }
+    closeImgPicker();
+    toast('✅ تم اختيار الصورة');
+  }
+
+  function updateInputPreview(inputId, url) {
+    const prevWrap = document.getElementById('prev-' + inputId);
+    if (!prevWrap) return;
+    if (url) {
+      prevWrap.style.display = '';
+      prevWrap.querySelector('img').src = url;
+    } else {
+      prevWrap.style.display = 'none';
+    }
+  }
+
+  // Wire up live preview when typing in an image URL input
+  ['sec-img-makeup','sec-img-skincare','sec-img-vitamins','sec-img-personal','hero-bg-img','p-image'].forEach(id => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => updateInputPreview(id, el.value.trim()));
+    });
+  });
+
+  // ── Product image direct upload ──────────────────────
+  function triggerProductImgUpload() {
+    document.getElementById('p-image-file').click();
+  }
+
+  async function uploadProductImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    toast('⏳ جارٍ رفع الصورة...');
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: apiHeaders(),
+          body: JSON.stringify({ filename: file.name, data: reader.result, type: file.type })
+        });
+        const json = await res.json();
+        if (json.url) {
+          document.getElementById('p-image').value = json.url;
+          updateInputPreview('p-image', json.url);
+          toast('✅ تم رفع الصورة وحفظها في ملفات المشروع');
+        } else {
+          toast('❌ فشل رفع الصورة: ' + (json.error || ''), 'error');
+        }
+      } catch(e) {
+        toast('❌ خطأ في الاتصال', 'error');
+      }
+      input.value = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* ══ confirmDialog (compat wrapper) ══ */
+  function confirmDialog(msg, callback) {
+    adminConfirm(msg).then(ok => { if (ok) callback(); });
+  }
+
+  /* ══ BOOT ══ */
+  const currUser = DB.getCurrentUser();
+  if (currUser && currUser.role === 'admin') {
+    document.getElementById('auth-gate').style.display = 'none';
+    initAdmin();
+    initUpload();
+    loadAssets();
+  }
+</script>
+
+<!-- Image Picker Modal -->
+<div id="img-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:18px;width:100%;max-width:700px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #f0e8f0">
+      <h3 style="margin:0;font-size:1rem;font-weight:700">🖼️ اختاري صورة من المرفوعات</h3>
+      <button onclick="closeImgPicker()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;line-height:1;color:#888">✕</button>
+    </div>
+    <div id="img-picker-grid" style="padding:16px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;flex:1"></div>
+  </div>
+</div>
+</body>
+</html>
