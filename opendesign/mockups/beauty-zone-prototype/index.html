@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بيوتي زون — بروتوتايب</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rose: #C2856B; --plum: #8B3A3A; --gold: #C4A35A; --champagne: #F0E6D3;
+  --warm-bg: #F5EDE3; --surface: #FFF8F2; --text-dark: #2C1810; --text-mid: #6B4C3B;
+  --text-light: #9C7A6A; --olive: #5B7B4F; --rose-light: #E8C4B0;
+  --rose-glow: rgba(194,133,107,0.2); --nav-bg: #FFF8F2; --card-bg: #FFF8F2;
+  --shadow-sm: 0 1px 3px rgba(44,24,16,0.06);
+  --shadow-md: 0 4px 16px rgba(44,24,16,0.08);
+  --shadow-lg: 0 8px 32px rgba(44,24,16,0.12);
+  --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+}
+[data-theme="dark"] {
+  --warm-bg: #1A0F0A; --surface: rgba(44,24,16,0.9); --text-dark: #F5EDE3;
+  --text-mid: #C4A35A; --text-light: #9C7A6A; --champagne: #3A2A1A;
+  --rose-glow: rgba(196,163,90,0.15); --nav-bg: #1A0F0A; --card-bg: rgba(44,24,16,0.7);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: #1a1a2e;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; margin: 0; padding: 20px;
+}
+.phone-frame {
+  width: 390px; height: 844px;
+  background: var(--warm-bg); border-radius: 44px; overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 0 4px #2a2a3e, 0 0 0 8px #1a1a2e, 0 20px 60px rgba(0,0,0,0.5);
+  transition: background 0.3s;
+}
+.phone-notch {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 160px; height: 30px; background: #1a1a2e;
+  border-radius: 0 0 18px 18px; z-index: 100;
+}
+.phone-notch::after {
+  content: ''; position: absolute; top: 8px; left: 50%;
+  transform: translateX(-50%); width: 10px; height: 10px;
+  background: #3a3a5e; border-radius: 50%;
+}
+.app-content { height: 100%; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+.app-content::-webkit-scrollbar { display: none; }
+.status-bar {
+  position: absolute; top: 8px; left: 0; right: 0;
+  display: flex; justify-content: space-between; padding: 0 32px;
+  z-index: 99; color: #fff; font-size: 11px;
+  font-family: 'DM Sans', sans-serif; font-weight: 500;
+}
+.theme-toggle {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--text-light); display: flex; align-items: center;
+  transition: color 0.2s; font-size: 13px;
+}
+.theme-toggle:hover { color: var(--gold); }
+
+.page {
+  display: flex; flex-direction: column;
+  min-height: 100%; position: absolute; inset: 0;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+}
+.page.slide-left { transform: translateX(-30px); opacity: 0; }
+.page.slide-right { transform: translateX(30px); opacity: 0; }
+.page.active { transform: translateX(0); opacity: 1; }
+
+.page-header {
+  padding: 48px 20px 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.page-header h1 {
+  font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 700;
+  color: var(--text-dark); flex: 1;
+}
+.action-btn {
+  width: 38px; height: 38px; border: none;
+  background: var(--card-bg); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: var(--shadow-sm);
+  transition: all 0.2s; color: var(--text-dark);
+}
+.action-btn:hover { background: var(--champagne); transform: scale(1.05); }
+.action-btn:active { transform: scale(0.95); }
+
+.bottom-nav {
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 6px 12px 18px; background: var(--nav-bg);
+  border-top: 1px solid rgba(194,133,107,0.1);
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 50;
+  transition: background 0.3s;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; cursor: pointer; padding: 4px 14px;
+  border-radius: 12px; transition: all 0.2s; position: relative;
+  color: var(--text-light); font-family: 'Tajawal', sans-serif;
+  font-size: 11px; font-weight: 500;
+}
+.nav-item svg { width: 22px; height: 22px; transition: all 0.2s; }
+.nav-item.active { color: var(--plum); }
+.nav-item.active svg { color: var(--plum); stroke-width: 2.5; }
+.nav-item:not(.active):hover { color: var(--text-mid); }
+.nav-item .badge {
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: var(--plum); color: #fff; font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px; font-family: 'DM Sans', sans-serif;
+}
+
+/* ===== STORE ===== */
+.store-page { background: var(--warm-bg); }
+.store-search {
+  margin: 4px 20px 12px; position: relative;
+}
+.store-search input {
+  width: 100%; padding: 12px 40px 12px 16px;
+  border: 1px solid rgba(194,133,107,0.15); border-radius: 12px;
+  font-family: 'Tajawal', sans-serif; font-size: 14px; color: var(--text-dark);
+  background: var(--card-bg); outline: none; transition: all 0.3s;
+}
+.store-search input:focus {
+  border-color: var(--rose); box-shadow: 0 0 0 3px var(--rose-glow);
+}
+.store-search input::placeholder { color: var(--text-light); }
+.store-search .search-icon {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-light); pointer-events: none;
+}
+.store-grid {
+  padding: 0 16px 20px; display: grid;
+  grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.prod-card {
+  background: var(--card-bg); border-radius: var(--radius-md);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+}
+.prod-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.prod-card:active { transform: scale(0.97); }
+.prod-img {
+  width: 100%; aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; position: relative; overflow: hidden;
+}
+.prod-img svg { width: 48px; height: 48px; color: #fff; opacity: 0.6; }
+.prod-info { padding: 10px 12px 12px; }
+.prod-info .cat {
+  font-size: 10px; color: var(--text-light); font-weight: 500;
+  margin-bottom: 2px;
+}
+.prod-info h4 {
+  font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--text-dark); margin-bottom: 6px;
+}
+.prod-actions {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.prod-actions .price {
+  font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700;
+  color: var(--plum);
+}
+.add-cart-btn {
+  width: 34px; height: 34px; border: none; border-radius: 10px;
+  background: linear-gradient(135deg, var(--rose), var(--gold));
+  color: #fff; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all 0.2s;
+}
+.add-cart-btn:hover { transform: scale(1.1); box-shadow: 0 3px 10px var(--rose-glow); }
+.add-cart-btn:active { transform: scale(0.9); }
+.add-cart-btn.added {
+  background: var(--olive); pointer-events: none;
+}
+.add-cart-btn svg { width: 16px; height: 16px; }
+
+/* ===== LOGIN ===== */
+.login-wrapper {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  padding: 0 24px;
+  background: linear-gradient(160deg, #2C1810 0%, #1A0F0A 40%, #2C1810 100%);
+  position: relative; overflow: hidden;
+}
+.login-wrapper::before {
+  content: ''; position: absolute; width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(194,133,107,0.15), transparent 70%);
+  top: -80px; right: -80px; pointer-events: none;
+}
+.login-wrapper::after {
+  content: ''; position: absolute; width: 250px; height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,163,90,0.1), transparent 70%);
+  bottom: -60px; left: -60px; pointer-events: none;
+}
+.login-brand { text-align: center; margin-bottom: 28px; position: relative; z-index: 1; }
+.login-brand .logo-icon {
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, var(--gold), var(--rose));
+  border-radius: 16px; display: flex; align-items: center;
+  justify-content: center; margin: 0 auto 12px;
+  font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #fff;
+  box-shadow: 0 4px 20px rgba(196,163,90,0.3);
+}
+.login-brand h1 {
+  font-family: 'Playfair Display', serif; font-size: 26px; color: #F5EDE3; margin-bottom: 2px;
+}
+.login-brand p { color: rgba(245,237,227,0.5); font-size: 13px; font-weight: 400; }
+.login-card {
+  background: rgba(255,248,242,0.07);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,248,242,0.1);
+  border-radius: var(--radius-lg); padding: 24px; position: relative; z-index: 1;
+}
+.login-tabs {
+  display: flex; gap: 4px; background: rgba(255,248,242,0.05);
+  border-radius: 10px; padding: 4px; margin-bottom: 20px;
+}
+.login-tab {
+  flex: 1; padding: 9px; border: none; background: transparent;
+  color: rgba(245,237,227,0.4); font-family: 'Tajawal', sans-serif;
+  font-size: 13px; font-weight: 500; border-radius: 8px;
+  cursor: pointer; transition: all 0.3s;
+}
+.login-tab.active { background: rgba(194,133,107,0.25); color: #F5EDE3; }
+.form-group { margin-bottom: 14px; position: relative; }
+.form-group label {
+  display: block; font-size: 12px; font-weight: 500;
+  color: rgba(245,237,227,0.6); margin-bottom: 5px;
+}
+.input-wrap { position: relative; }
+.input-wrap input {
+  width: 100%; padding: 12px 14px;
+  border: 1px solid rgba(255,248,242,0.1); border-radius: var(--radius-sm);
+  font-family: 'Tajawal', sans-serif; font-size: 14px;
+  background: rgba(255,248,242,0.05); color: #F5EDE3;
+  transition: all 0.3s; outline: none;
+}
+.input-wrap input::placeholder { color: rgba(245,237,227,0.25); }
+.input-wrap input:focus {
+  border-color: var(--rose); background: rgba(255,248,242,0.08);
+  box-shadow: 0 0 0 3px rgba(194,133,107,0.12);
+}
+.input-wrap input.error {
+  border-color: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.12);
+}
+.pw-toggle {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: rgba(245,237,227,0.3);
+  cursor: pointer; padding: 4px; display: flex;
+  transition: color 0.2s;
+}
+.pw-toggle:hover { color: rgba(245,237,227,0.6); }
+.form-error { color: #e74c3c; font-size: 11px; margin-top: 3px; }
+.submit-btn {
+  width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--rose), var(--gold)); color: #fff;
+  font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+}
+.submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(194,133,107,0.25); }
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.submit-btn .spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.form-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.remember-me {
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.remember-me input { display: none; }
+.remember-me .check {
+  width: 18px; height: 18px; border: 1px solid rgba(255,248,242,0.2);
+  border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.remember-me input:checked + .check {
+  background: var(--rose); border-color: var(--rose);
+}
+.remember-me .check svg { width: 12px; height: 12px; color: #fff; display: none; }
+.remember-me input:checked + .check svg { display: block; }
+.remember-me span { font-size: 12px; color: rgba(245,237,227,0.5); }
+.forgot-link {
+  background: none; border: none; color: rgba(194,133,107,0.7);
+  font-family: 'Tajawal', sans-serif; font-size: 12px; cursor: pointer;
+  transition: color 0.2s;
+}
+.forgot-link:hover { color: var(--rose); }
+
+/* ===== CART ===== */
+.cart-page { background: var(--warm-bg); }
+.cart-content {
+  flex: 1; padding: 0 16px; overflow-y: auto;
+  scrollbar-width: none;
+}
+.cart-content::-webkit-scrollbar { display: none; }
+.cart-empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 24px; text-align: center;
+}
+.cart-empty svg { width: 72px; height: 72px; color: var(--text-light); margin-bottom: 14px; opacity: 0.35; }
+.cart-empty h3 { font-size: 17px; color: var(--text-dark); margin-bottom: 4px; }
+.cart-empty p { color: var(--text-light); font-size: 13px; margin-bottom: 18px; }
+.primary-btn {
+  padding: 11px 26px; border: none; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--rose), var(--gold)); color: #fff;
+  font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+}
+.primary-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--rose-glow); }
+.cart-item {
+  display: flex; gap: 12px; padding: 14px 0;
+  border-bottom: 1px solid rgba(194,133,107,0.08);
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.cart-item:last-child { border-bottom: none; }
+.cart-item-img {
+  width: 68px; height: 68px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.cart-item-img svg { width: 28px; height: 28px; color: #fff; opacity: 0.7; }
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-info h4 {
+  font-size: 13px; font-weight: 600; color: var(--text-dark);
+  margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cart-item-info .item-cat { font-size: 11px; color: var(--text-light); margin-bottom: 2px; }
+.cart-item-info .item-price {
+  font-size: 14px; font-weight: 700; color: var(--plum);
+}
+.cart-item-info .item-total {
+  font-size: 11px; color: var(--text-light); margin-top: 1px;
+}
+.cart-item-actions {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+.remove-btn {
+  background: none; border: none; color: var(--text-light);
+  cursor: pointer; padding: 3px; transition: all 0.2s; opacity: 0.4;
+}
+.remove-btn:hover { opacity: 1; color: #e74c3c; transform: scale(1.1); }
+.qty-control {
+  display: flex; align-items: center; gap: 0;
+  background: var(--card-bg); border-radius: 8px; overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.qty-btn {
+  width: 30px; height: 30px; border: none; background: transparent;
+  color: var(--text-dark); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s; font-family: 'Tajawal', sans-serif;
+}
+.qty-btn:hover { background: var(--champagne); }
+.qty-val {
+  width: 32px; text-align: center; font-size: 13px; font-weight: 600;
+  color: var(--text-dark); font-family: 'DM Sans', sans-serif;
+}
+.cart-summary {
+  padding: 16px 20px; background: var(--card-bg);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -4px 20px rgba(44,24,16,0.05);
+  margin-top: auto; transition: background 0.3s;
+}
+.coupon-area {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.coupon-area input {
+  flex: 1; padding: 10px 14px; border: 1px solid rgba(194,133,107,0.15);
+  border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 13px;
+  color: var(--text-dark); background: var(--warm-bg); outline: none;
+  transition: border-color 0.2s;
+}
+.coupon-area input:focus { border-color: var(--rose); }
+.coupon-area input::placeholder { color: var(--text-light); }
+.coupon-area button {
+  padding: 10px 16px; border: none; border-radius: 8px;
+  background: var(--plum); color: #fff; font-family: 'Tajawal', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s; white-space: nowrap;
+}
+.coupon-area button:hover { background: var(--rose); }
+.coupon-area button:disabled { opacity: 0.4; cursor: not-allowed; }
+.coupon-msg { font-size: 11px; margin-bottom: 8px; }
+.coupon-msg.success { color: var(--olive); }
+.coupon-msg.error { color: #e74c3c; }
+.summary-row {
+  display: flex; justify-content: space-between; font-size: 13px;
+  color: var(--text-mid); margin-bottom: 6px;
+}
+.summary-row.total {
+  font-size: 17px; font-weight: 700; color: var(--text-dark);
+  padding-top: 10px; margin-top: 10px;
+  border-top: 1px solid rgba(194,133,107,0.12);
+}
+.summary-row.total .price { color: var(--plum); }
+.shipping-free { color: var(--olive); font-weight: 500; }
+.shipping-bar {
+  height: 4px; background: rgba(194,133,107,0.15); border-radius: 2px;
+  margin-bottom: 8px; overflow: hidden;
+}
+.shipping-bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--rose), var(--gold));
+  border-radius: 2px; transition: width 0.5s ease;
+}
+.checkout-btn {
+  width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--rose), var(--gold)); color: #fff;
+  font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 12px; transition: all 0.3s;
+}
+.checkout-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(194,133,107,0.25); }
+.checkout-btn:active { transform: translateY(0); }
+.checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ===== ACCOUNT ===== */
+.account-page { background: var(--warm-bg); }
+.account-content {
+  flex: 1; padding: 0 16px; overflow-y: auto;
+  scrollbar-width: none;
+}
+.account-content::-webkit-scrollbar { display: none; }
+.profile-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--card-bg); border-radius: var(--radius-lg);
+  padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+  transition: background 0.3s;
+}
+.profile-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--plum), var(--rose));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif; font-size: 18px; color: #fff;
+  flex-shrink: 0;
+}
+.profile-info { flex: 1; }
+.profile-info h3 { font-size: 15px; font-weight: 700; color: var(--text-dark); }
+.profile-info p { font-size: 12px; color: var(--text-light); }
+.edit-profile-btn {
+  width: 36px; height: 36px; border: none;
+  background: var(--champagne); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-mid); transition: all 0.2s;
+}
+.edit-profile-btn:hover { background: var(--rose-light); color: var(--text-dark); }
+.sec-title {
+  font-size: 14px; font-weight: 700; color: var(--text-dark);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.sec-title svg { width: 16px; height: 16px; color: var(--rose); }
+.info-card {
+  background: var(--card-bg); border-radius: var(--radius-md);
+  padding: 14px; box-shadow: var(--shadow-sm); margin-bottom: 16px;
+  transition: background 0.3s;
+}
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+}
+.info-row + .info-row { border-top: 1px solid rgba(194,133,107,0.06); }
+.info-label { font-size: 12px; color: var(--text-light); }
+.info-value { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+
+.order-item {
+  background: var(--card-bg); border-radius: var(--radius-md);
+  padding: 14px; margin-bottom: 8px; box-shadow: var(--shadow-sm);
+  transition: background 0.3s; cursor: pointer; overflow: hidden;
+}
+.order-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+}
+.order-id { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; color: var(--text-mid); }
+.order-status-badge {
+  font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 16px;
+}
+.order-status-badge.pending { background: #FFF3E0; color: #E65100; }
+.order-status-badge.processing { background: #E3F2FD; color: #1565C0; }
+.order-status-badge.shipped { background: #F3E5F5; color: #7B1FA2; }
+.order-status-badge.completed { background: #E8F5E9; color: #2E7D32; }
+.order-status-badge.cancelled { background: #FFEBEE; color: #C62828; }
+[data-theme="dark"] .order-status-badge.pending { background: rgba(230,81,0,0.15); }
+[data-theme="dark"] .order-status-badge.processing { background: rgba(21,101,192,0.15); }
+[data-theme="dark"] .order-status-badge.shipped { background: rgba(123,31,162,0.15); }
+[data-theme="dark"] .order-status-badge.completed { background: rgba(46,125,50,0.15); }
+[data-theme="dark"] .order-status-badge.cancelled { background: rgba(198,40,40,0.15); }
+.order-preview { font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+.order-footer {
+  display: flex; justify-content: space-between; font-size: 13px;
+  font-weight: 600; color: var(--text-dark);
+}
+.order-footer .order-date { font-weight: 400; font-size: 11px; color: var(--text-light); }
+.order-expand {
+  max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+}
+.order-expand.open { max-height: 200px; }
+.order-expand-inner { padding-top: 10px; border-top: 1px solid rgba(194,133,107,0.08); margin-top: 8px; }
+.order-expand-item {
+  display: flex; justify-content: space-between; font-size: 12px;
+  color: var(--text-mid); padding: 4px 0;
+}
+.logout-btn {
+  width: 100%; padding: 12px; border: 1px solid rgba(194,133,107,0.15);
+  border-radius: var(--radius-sm); background: transparent;
+  color: var(--text-mid); font-family: 'Tajawal', sans-serif;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all 0.3s; margin-top: 8px; margin-bottom: 60px;
+}
+.logout-btn:hover {
+  background: rgba(231,76,60,0.05); border-color: rgba(231,76,60,0.2); color: #e74c3c;
+}
+.guest-card {
+  background: var(--card-bg); border-radius: var(--radius-lg);
+  padding: 36px 24px; text-align: center; box-shadow: var(--shadow-sm);
+  margin-top: 36px;
+}
+.guest-card svg { width: 56px; height: 56px; color: var(--text-light); opacity: 0.35; margin-bottom: 10px; }
+.guest-card h3 { font-size: 17px; color: var(--text-dark); margin-bottom: 4px; }
+.guest-card p { color: var(--text-light); font-size: 13px; margin-bottom: 18px; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.45); display: flex;
+  align-items: center; justify-content: center;
+  z-index: 200; backdrop-filter: blur(8px);
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-inner {
+  background: var(--card-bg); border-radius: var(--radius-xl);
+  padding: 28px 24px; text-align: center; width: 290px;
+  box-shadow: var(--shadow-lg); animation: scaleIn 0.25s ease;
+  transition: background 0.3s;
+}
+@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-icon-wrap {
+  width: 50px; height: 50px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.modal-icon-wrap.success { background: #E8F5E9; color: #2E7D32; }
+.modal-icon-wrap.warning { background: #FFF3E0; color: #E65100; }
+.modal-icon-wrap.info { background: #E3F2FD; color: #1565C0; }
+[data-theme="dark"] .modal-icon-wrap.success { background: rgba(46,125,50,0.2); }
+[data-theme="dark"] .modal-icon-wrap.warning { background: rgba(230,81,0,0.2); }
+[data-theme="dark"] .modal-icon-wrap.info { background: rgba(21,101,192,0.2); }
+.modal-inner h3 { font-size: 17px; color: var(--text-dark); margin-bottom: 4px; }
+.modal-inner p { font-size: 13px; color: var(--text-mid); margin-bottom: 18px; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: absolute; top: 54px; left: 16px; right: 16px;
+  background: var(--card-bg); border-radius: 12px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 150;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 3s forwards;
+  transition: background 0.3s;
+}
+@keyframes toastIn { from { transform: translateY(-16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-16px); } }
+.toast-icon { width: 20px; height: 20px; flex-shrink: 0; }
+.toast-icon.success { color: #2E7D32; }
+.toast-icon.info { color: #1565C0; }
+.toast-msg { flex: 1; font-size: 13px; color: var(--text-dark); font-weight: 500; }
+.toast-undo {
+  padding: 4px 10px; border: 1px solid var(--rose); border-radius: 6px;
+  background: transparent; color: var(--rose); font-family: 'Tajawal', sans-serif;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.toast-undo:hover { background: var(--rose); color: #fff; }
+
+/* ===== SETTINGS MODAL ===== */
+.edit-field { margin-bottom: 12px; }
+.edit-field label {
+  display: block; font-size: 12px; color: var(--text-light); margin-bottom: 3px;
+}
+.edit-field input {
+  width: 100%; padding: 10px 12px; border: 1px solid rgba(194,133,107,0.15);
+  border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 13px;
+  color: var(--text-dark); background: var(--warm-bg); outline: none;
+  direction: ltr; text-align: right;
+}
+.edit-field input:focus { border-color: var(--rose); box-shadow: 0 0 0 3px var(--rose-glow); }
+.edit-actions { display: flex; gap: 8px; margin-top: 16px; }
+.edit-actions button {
+  flex: 1; padding: 10px; border-radius: 8px;
+  font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.edit-actions .save-btn {
+  background: linear-gradient(135deg, var(--rose), var(--gold));
+  color: #fff; border: none;
+}
+.edit-actions .save-btn:hover { box-shadow: 0 3px 12px var(--rose-glow); }
+.edit-actions .cancel-btn {
+  background: transparent; border: 1px solid rgba(194,133,107,0.15);
+  color: var(--text-mid);
+}
+.edit-actions .cancel-btn:hover { background: rgba(194,133,107,0.05); }
+
+.addr-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; font-size: 13px; color: var(--text-dark);
+}
+.addr-item + .addr-item { border-top: 1px solid rgba(194,133,107,0.06); }
+.addr-item .addr-label { font-weight: 500; }
+.addr-item .addr-detail { color: var(--text-light); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="status-bar">
+    <span>9:41</span>
+    <button class="theme-toggle" id="themeBtn" style="background:none;border:none;cursor:pointer;color:#fff;font-size:16px;padding:0;line-height:1;">☀</button>
+  </div>
+  <div id="root"></div>
+</div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ===== ICON LIBRARY =====
+const I = ({ n, s = 22 }) => {
+  const icons = {
+    home: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
+    cart: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>,
+    user: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+    mail: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+    phone: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>,
+    shop: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>,
+    x: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+    plus: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+    minus: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+    check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+    pkg: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+    bag: <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>,
+    logout: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+    edit: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+    eye: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+    eyeOff: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
+    search: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+    mapPin: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+    lock: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>,
+    chevronDown: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+    truck: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
+    sun: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
+    moon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>,
+    info: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+    alertCircle: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+    lipstick: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="2" width="8" height="6" rx="1"/><path d="M6 14h12v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4z"/><path d="M10 2v4"/><path d="M14 2v4"/></svg>,
+    droplet: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>,
+    sparkles: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M18.5 14.5L16 16l2.5 1.5L20 20l1.5-2.5L24 16l-2.5-1.5z"/><path d="M6 16l-1.5 2.5L2 20l2.5 1.5L6 24l1.5-2.5L10 20l-2.5-1.5z"/></svg>,
+    eyeShadow: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="10" rx="6" ry="3"/><path d="M6 10v4a6 6 0 0012 0v-4"/></svg>,
+    leaf: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 019.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>,
+  };
+  return icons[n] || null;
+};
+
+// ===== DATA =====
+const PRODUCTS = [
+  { id: 1, name: 'أحمر شفاه مات', category: 'مكياج', price: 89, icon: 'lipstick', gradient: 'linear-gradient(135deg, #c97b8a, #e8b4c0)' },
+  { id: 2, name: 'كريم ترطيب البشرة', category: 'عناية بالبشرة', price: 120, icon: 'droplet', gradient: 'linear-gradient(135deg, #4a7c5e, #7db892)' },
+  { id: 3, name: 'سيروم فيتامين C', category: 'عناية بالبشرة', price: 145, icon: 'sparkles', gradient: 'linear-gradient(135deg, #b87333, #c9a84c)' },
+  { id: 4, name: 'ظلال عيون سموكي', category: 'مكياج', price: 95, icon: 'eyeShadow', gradient: 'linear-gradient(135deg, #8b5a7a, #c492b1)' },
+  { id: 5, name: 'ماسك الفحم', category: 'عناية بالبشرة', price: 55, icon: 'leaf', gradient: 'linear-gradient(135deg, #2C1810, #6B4C3B)' },
+  { id: 6, name: 'كريم أساس طبيعي', category: 'مكياج', price: 110, icon: 'droplet', gradient: 'linear-gradient(135deg, #c2856b, #e8c4b0)' },
+];
+
+const ORDERS_BY_USER = {
+  'sara@example.com': [
+    { id: '#BZ-1004', date: '2026-06-15', items: [{ name: 'أحمر شفاه مات', qty: 2, price: 89 }, { name: 'كريم ترطيب البشرة', qty: 1, price: 120 }], total: 298, status: 'completed' },
+    { id: '#BZ-1005', date: '2026-06-12', items: [{ name: 'سيروم فيتامين C', qty: 1, price: 145 }, { name: 'ماسك الفحم', qty: 2, price: 55 }, { name: 'ظلال عيون سموكي', qty: 1, price: 95 }], total: 350, status: 'shipped' },
+    { id: '#BZ-1006', date: '2026-06-08', items: [{ name: 'أحمر شفاه مات', qty: 1, price: 89 }], total: 89, status: 'processing' },
+  ],
+  'admin@beautyzone.ps': [
+    { id: '#BZ-1001', date: '2026-06-14', items: [{ name: 'ظلال عيون سموكي', qty: 5, price: 95 }, { name: 'كريم أساس طبيعي', qty: 3, price: 110 }], total: 805, status: 'completed' },
+  ],
+};
+const DEFAULT_ORDERS = [
+  { id: '#BZ-1000', date: '2026-06-10', items: [{ name: 'أحمر شفاه مات', qty: 1, price: 89 }], total: 89, status: 'completed' },
+];
+
+const CATEGORY_GRADIENTS = {
+  'مكياج': 'linear-gradient(135deg, #c97b8a, #e8b4c0)',
+  'عناية بالبشرة': 'linear-gradient(135deg, #4a7c5e, #7db892)',
+};
+
+// ===== HELPERS =====
+const ls = { get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+// ===== TOAST =====
+function Toast({ msg, type, onClose, onUndo }) {
+  useEffect(() => { const t = setTimeout(onClose, 3300); return () => clearTimeout(t); }, []);
+  return (
+    <div className="toast">
+      <div className={`toast-icon ${type}`}>{type === 'success' ? <I n="check" s={20} /> : <I n="info" s={20} />}</div>
+      <span className="toast-msg">{msg}</span>
+      {onUndo && <button className="toast-undo" onClick={() => { onUndo(); onClose(); }}>تراجع</button>}
+    </div>
+  );
+}
+
+// ===== MODAL =====
+function Modal({ type, title, msg, btn, onClose, children }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-inner" onClick={e => e.stopPropagation()}>
+        {type && (<div className={`modal-icon-wrap ${type}`}>{type === 'success' ? <I n="check" s={24} /> : type === 'warning' ? <I n="alertCircle" s={24} /> : <I n="info" s={24} />}</div>)}
+        {title && <h3>{title}</h3>}
+        {msg && <p>{msg}</p>}
+        {children}
+        {btn && <button className="primary-btn" onClick={onClose}>{btn}</button>}
+      </div>
+    </div>
+  );
+}
+
+// ===== STORE =====
+function Store({ cart, onAdd, onNavigate }) {
+  const [search, setSearch] = useState('');
+  const [added, setAdded] = useState({});
+  const filtered = PRODUCTS.filter(p => p.name.includes(search) || p.category.includes(search));
+  const handleAdd = (p) => {
+    onAdd(p);
+    setAdded(a => ({ ...a, [p.id]: true }));
+    setTimeout(() => setAdded(a => ({ ...a, [p.id]: false })), 1200);
+  };
+  return (
+    <div className="store-page" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="page-header" style={{ paddingBottom: 0 }}>
+        <h1>بيوتي زون</h1>
+        <span style={{ fontSize: '12px', color: 'var(--text-light)' }}>تجميل • عناية • صحة</span>
+      </div>
+      <div className="store-search">
+        <div className="search-icon"><I n="search" s={18} /></div>
+        <input placeholder="ابحثي عن منتج..." value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+      <div className="store-grid">
+        {filtered.map(p => (
+          <div className="prod-card" key={p.id}>
+            <div className="prod-img" style={{ background: p.gradient }}>
+              <I n={p.icon} s={48} />
+            </div>
+            <div className="prod-info">
+              <div className="cat">{p.category}</div>
+              <h4>{p.name}</h4>
+              <div className="prod-actions">
+                <span className="price">{p.price} ₪</span>
+                <button className={`add-cart-btn ${added[p.id] ? 'added' : ''}`} onClick={() => handleAdd(p)}>
+                  <I n="plus" s={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {filtered.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)', fontSize: '14px' }}>
+          لا توجد نتائج لـ "{search}"
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== LOGIN =====
+function LoginScreen({ onLogin, onNavigateToAccount }) {
+  const [tab, setTab] = useState('login');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState({ email: '', password: '', name: '', phone: '' });
+  const [fieldErrs, setFieldErrs] = useState({});
+  const [showPw, setShowPw] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  useEffect(() => {
+    const saved = ls.get('bz_remembered', null);
+    if (saved) setForm(f => ({ ...f, email: saved.email, password: saved.password }));
+  }, []);
+
+  const change = (f, v) => { setForm(p => ({ ...p, [f]: v })); setFieldErrs(e => ({ ...e, [f]: '' })); setError(''); };
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validate = () => {
+    const e = {};
+    if (tab === 'signup') {
+      if (!form.name.trim()) e.name = 'الاسم مطلوب';
+      if (!/^(059|056)\d{7}$/.test(form.phone)) e.phone = 'مثال: 0599123456';
+    }
+    if (!form.email.trim() || !validEmail.test(form.email)) e.email = 'البريد الإلكتروني غير صحيح';
+    if (!form.password || form.password.length < 6) e.password = '6 أحرف على الأقل';
+    setFieldErrs(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+    setLoading(true); setError('');
+    setTimeout(() => {
+      setLoading(false);
+      if (tab === 'login') {
+        if ((form.email === 'sara@example.com' && form.password === '123456') || (form.email === 'admin@beautyzone.ps' && form.password === 'admin123')) {
+          const u = form.email === 'admin@beautyzone.ps' ? { name: 'المدير', email: form.email, phone: '0599000000', joined: 'يناير 2026' } : { name: 'سارة أحمد', email: form.email, phone: '0599123456', joined: 'يناير 2026' };
+          if (remember) ls.set('bz_remembered', { email: form.email, password: form.password });
+          else ls.set('bz_remembered', null);
+          onLogin(u);
+          onNavigateToAccount();
+        } else setError('بريد إلكتروني أو كلمة مرور غير صحيحة');
+      } else {
+        const u = { name: form.name, email: form.email, phone: form.phone, joined: 'يونيو 2026' };
+        if (remember) ls.set('bz_remembered', { email: form.email, password: form.password });
+        else ls.set('bz_remembered', null);
+        onLogin(u);
+        onNavigateToAccount();
+      }
+    }, 1000);
+  };
+
+  if (forgotMode) return (
+    <div className="login-wrapper">
+      <div className="login-brand">
+        <div className="logo-icon">BZ</div>
+        <h1>بيوتي زون</h1>
+        <p>استعادة كلمة المرور</p>
+      </div>
+      <div className="login-card">
+        {!resetSent ? (
+          <>
+            <p style={{ color: 'rgba(245,237,227,0.6)', fontSize: '13px', textAlign: 'center', marginBottom: '20px' }}>
+              أدخلي بريدك الإلكتروني وسنرسل لك رابط استعادة كلمة المرور
+            </p>
+            <div className="form-group">
+              <label>البريد الإلكتروني</label>
+              <div className="input-wrap">
+                <input type="email" placeholder="your@email.com" value={form.email} onChange={e => change('email', e.target.value)} />
+              </div>
+            </div>
+            <button className="submit-btn" onClick={() => { if (form.email.trim() && validEmail.test(form.email)) setResetSent(true); else setFieldErrs({ email: 'البريد الإلكتروني غير صحيح' }); }}>
+              إرسال رابط الاستعادة
+            </button>
+            <div className="login-footer" style={{ marginTop: '14px' }}>
+              <a className="forgot-link" onClick={() => setForgotMode(false)}>العودة لتسجيل الدخول</a>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ textAlign: 'center', padding: '10px 0' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(46,125,50,0.15)', color: '#2E7D32', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}><I n="check" s={24} /></div>
+              <h3 style={{ color: '#F5EDE3', fontSize: '16px', marginBottom: '4px' }}>تم إرسال الرابط</h3>
+              <p style={{ color: 'rgba(245,237,227,0.5)', fontSize: '12px', marginBottom: '16px' }}>تحققي من بريدك {form.email}</p>
+              <button className="submit-btn" onClick={() => { setForgotMode(false); setResetSent(false); }}>العودة</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="login-wrapper">
+      <div className="login-brand">
+        <div className="logo-icon">BZ</div>
+        <h1>بيوتي زون</h1>
+        <p>جمالك، بلمسة فرق</p>
+      </div>
+      <div className="login-card">
+        <div className="login-tabs">
+          <button className={`login-tab ${tab === 'login' ? 'active' : ''}`} onClick={() => { setTab('login'); setError(''); setFieldErrs({}); }}>تسجيل الدخول</button>
+          <button className={`login-tab ${tab === 'signup' ? 'active' : ''}`} onClick={() => { setTab('signup'); setError(''); setFieldErrs({}); }}>حساب جديد</button>
+        </div>
+        {tab === 'signup' && (
+          <>
+            <div className="form-group">
+              <label>الاسم الكامل</label>
+              <div className="input-wrap">
+                <input className={fieldErrs.name ? 'error' : ''} type="text" placeholder="اسمك الكامل" value={form.name} onChange={e => change('name', e.target.value)} />
+              </div>
+              {fieldErrs.name && <div className="form-error">{fieldErrs.name}</div>}
+            </div>
+            <div className="form-group">
+              <label>رقم الهاتف</label>
+              <div className="input-wrap">
+                <input className={fieldErrs.phone ? 'error' : ''} type="tel" placeholder="059XXXXXXXX" value={form.phone} onChange={e => change('phone', e.target.value)} />
+              </div>
+              {fieldErrs.phone && <div className="form-error">{fieldErrs.phone}</div>}
+            </div>
+          </>
+        )}
+        <div className="form-group">
+          <label>البريد الإلكتروني</label>
+          <div className="input-wrap">
+            <input className={fieldErrs.email ? 'error' : ''} type="email" placeholder="your@email.com" value={form.email} onChange={e => change('email', e.target.value)} />
+          </div>
+          {fieldErrs.email && <div className="form-error">{fieldErrs.email}</div>}
+        </div>
+        <div className="form-group">
+          <label>كلمة المرور</label>
+          <div className="input-wrap">
+            <input className={fieldErrs.password ? 'error' : ''} type={showPw ? 'text' : 'password'} placeholder="6 أحرف أو أكثر" value={form.password} onChange={e => change('password', e.target.value)} />
+            <button className="pw-toggle" onClick={() => setShowPw(!showPw)} type="button">
+              <I n={showPw ? 'eyeOff' : 'eye'} s={18} />
+            </button>
+          </div>
+          {fieldErrs.password && <div className="form-error">{fieldErrs.password}</div>}
+        </div>
+        {tab === 'login' && (
+          <div className="form-row">
+            <label className="remember-me">
+              <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
+              <span className="check"><I n="check" s={12} /></span>
+              <span>تذكريني</span>
+            </label>
+            <button className="forgot-link" onClick={() => setForgotMode(true)}>نسيت كلمة المرور؟</button>
+          </div>
+        )}
+        {error && <div style={{ color: '#e74c3c', fontSize: '12px', textAlign: 'center', marginBottom: '10px' }}>{error}</div>}
+        <button className="submit-btn" onClick={handleSubmit} disabled={loading}>
+          {loading ? <div className="spinner" /> : (tab === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب')}
+        </button>
+        <div style={{ textAlign: 'center', marginTop: '12px' }}>
+          <span style={{ color: 'rgba(245,237,227,0.3)', fontSize: '11px' }}>حساب تجريبي: sara@example.com / 123456</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== CART =====
+function CartScreen({ cart, onUpdateQty, onRemoveItem, onCheckout, onNavigate }) {
+  const [coupon, setCoupon] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [couponMsg, setCouponMsg] = useState('');
+  const [couponErr, setCouponErr] = useState(false);
+
+  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  const shipping = subtotal >= 200 ? 0 : 20;
+  const total = subtotal + shipping - discount;
+  const progress = Math.min(100, (subtotal / 200) * 100);
+
+  const applyCoupon = () => {
+    if (!coupon.trim()) return;
+    if (coupon.trim().toUpperCase() === 'BEAUTY10') { setDiscount(30); setCouponMsg('كود BEAUTY10: خصم 30 شيكل'); setCouponErr(false); }
+    else if (coupon.trim().toUpperCase() === 'WELCOME') { setDiscount(subtotal * 0.1); setCouponMsg('كود WELCOME: خصم 10%'); setCouponErr(false); }
+    else { setDiscount(0); setCouponMsg('الكود غير صالح'); setCouponErr(true); }
+  };
+
+  const handleQty = (id, qty) => {
+    if (qty <= 0) { onRemoveItem(id); return; }
+    onUpdateQty(id, qty);
+  };
+
+  if (cart.length === 0) return (
+    <div className="cart-page" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="page-header"><h1>سلة التسوق</h1></div>
+      <div className="cart-empty">
+        <I n="bag" s={72} />
+        <h3>سلتك فاضية</h3>
+        <p>أضيفي بعض المنتجات الرائعة لسلتك!</p>
+        <button className="primary-btn" onClick={() => onNavigate('store')}>تسوقي الآن</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="cart-page" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="page-header">
+        <h1>سلة التسوق</h1>
+        <span style={{ fontSize: '12px', color: 'var(--text-light)' }}>{cart.reduce((s, i) => s + i.quantity, 0)} أصناف</span>
+      </div>
+      <div className="cart-content">
+        {cart.map((item, idx) => (
+          <div className="cart-item" key={item.id} style={{ animationDelay: `${idx * 0.04}s` }}>
+            <div className="cart-item-img" style={{ background: item.gradient || CATEGORY_GRADIENTS[item.category] }}>
+              <I n={item.icon || 'sparkles'} s={28} />
+            </div>
+            <div className="cart-item-info">
+              <h4>{item.name}</h4>
+              <div className="item-cat">{item.category}</div>
+              <div className="item-price">{item.price} ₪</div>
+              <div className="item-total">المجموع: {item.price * item.quantity} ₪</div>
+            </div>
+            <div className="cart-item-actions">
+              <button className="remove-btn" onClick={() => onRemoveItem(item)} title="إزالة"><I n="x" s={16} /></button>
+              <div className="qty-control">
+                <button className="qty-btn" onClick={() => handleQty(item.id, item.quantity - 1)}><I n="minus" /></button>
+                <span className="qty-val">{item.quantity}</span>
+                <button className="qty-btn" onClick={() => handleQty(item.id, item.quantity + 1)}><I n="plus" /></button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="cart-summary">
+        <div className="coupon-area">
+          <input placeholder="كود خصم" value={coupon} onChange={e => { setCoupon(e.target.value); setCouponMsg(''); }} />
+          <button onClick={applyCoupon} disabled={!coupon.trim()}>تطبيق</button>
+        </div>
+        {couponMsg && <div className={`coupon-msg ${couponErr ? 'error' : 'success'}`}>{couponMsg}</div>}
+        <div className="summary-row"><span>المجموع</span><span>{subtotal} ₪</span></div>
+        <div className="summary-row">
+          <span>الشحن</span>
+          <span className={shipping === 0 ? 'shipping-free' : ''}>{shipping === 0 ? 'مجاني' : `${shipping} ₪`}</span>
+        </div>
+        {discount > 0 && <div className="summary-row" style={{ color: 'var(--olive)' }}><span>خصم</span><span>-{Math.round(discount)} ₪</span></div>}
+        {subtotal < 200 && (
+          <>
+            <div className="shipping-bar"><div className="shipping-bar-fill" style={{ width: `${progress}%` }} /></div>
+            <div style={{ fontSize: '11px', color: 'var(--text-light)', marginBottom: '6px', textAlign: 'center' }}>
+              أضيفي {200 - subtotal} ₪ إضافية للشحن المجاني
+            </div>
+          </>
+        )}
+        <div className="summary-row total"><span>الإجمالي</span><span className="price">{Math.max(0, Math.round(total))} ₪</span></div>
+        <button className="checkout-btn" onClick={onCheckout}>تأكيد الطلب عبر واتساب</button>
+      </div>
+    </div>
+  );
+}
+
+// ===== ACCOUNT =====
+function AccountScreen({ user, orders, onLogout, onNavigateToLogin, onUpdateUser }) {
+  const [expanded, setExpanded] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '' });
+  const [pwMode, setPwMode] = useState(false);
+  const [pwForm, setPwForm] = useState({ old: '', new: '', confirm: '' });
+  const [pwMsg, setPwMsg] = useState('');
+
+  const statusCls = (s) => s;
+  const statusTxt = (s) => ({ pending: 'قيد الانتظار', processing: 'قيد التجهيز', shipped: 'تم الشحن', completed: 'مكتمل', cancelled: 'ملغي' }[s] || s);
+
+  const openEdit = () => { setEditForm({ name: user.name, email: user.email, phone: user.phone }); setEditMode(true); };
+  const saveEdit = () => { onUpdateUser(editForm); setEditMode(false); };
+  const changePw = () => {
+    if (!pwForm.old || !pwForm.new || !pwForm.confirm) { setPwMsg('جميع الحقول مطلوبة'); return; }
+    if (pwForm.new.length < 6) { setPwMsg('كلمة المرور الجديدة 6 أحرف على الأقل'); return; }
+    if (pwForm.new !== pwForm.confirm) { setPwMsg('كلمتا المرور غير متطابقتين'); return; }
+    setPwMsg('تم تغيير كلمة المرور بنجاح');
+    setTimeout(() => { setPwMode(false); setPwMsg(''); setPwForm({ old: '', new: '', confirm: '' }); }, 1500);
+  };
+
+  if (!user) return (
+    <div className="account-page" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="page-header"><h1>حسابي</h1></div>
+      <div className="account-content">
+        <div className="guest-card">
+          <I n="user" s={56} />
+          <h3>مرحباً بك</h3>
+          <p>سجّلي الدخول لمشاهدة معلومات حسابك وطلباتك</p>
+          <button className="primary-btn" onClick={onNavigateToLogin}>تسجيل الدخول</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const initials = user.name.split(' ').map(w => w[0]).join('').slice(0, 2);
+
+  const editModal = (
+    <Modal type={null} onClose={() => setEditMode(false)}>
+      <h3 style={{ marginBottom: '16px' }}>تعديل الملف الشخصي</h3>
+      <div className="edit-field">
+        <label>الاسم</label>
+        <input value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} />
+      </div>
+      <div className="edit-field">
+        <label>البريد الإلكتروني</label>
+        <input value={editForm.email} onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))} />
+      </div>
+      <div className="edit-field">
+        <label>رقم الهاتف</label>
+        <input value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} />
+      </div>
+      <div className="edit-actions">
+        <button className="save-btn" onClick={saveEdit}>حفظ</button>
+        <button className="cancel-btn" onClick={() => setEditMode(false)}>إلغاء</button>
+      </div>
+    </Modal>
+  );
+
+  const pwModal = (
+    <Modal type={null} onClose={() => { setPwMode(false); setPwMsg(''); }}>
+      <h3 style={{ marginBottom: '16px' }}>تغيير كلمة المرور</h3>
+      <div className="edit-field">
+        <label>كلمة المرور الحالية</label>
+        <input type="password" value={pwForm.old} onChange={e => setPwForm(f => ({ ...f, old: e.target.value }))} />
+      </div>
+      <div className="edit-field">
+        <label>كلمة المرور الجديدة</label>
+        <input type="password" value={pwForm.new} onChange={e => setPwForm(f => ({ ...f, new: e.target.value }))} />
+      </div>
+      <div className="edit-field">
+        <label>تأكيد كلمة المرور الجديدة</label>
+        <input type="password" value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} />
+      </div>
+      {pwMsg && <div style={{ color: pwMsg.includes('بناج') ? 'var(--olive)' : '#e74c3c', fontSize: '12px', textAlign: 'center', marginBottom: '8px' }}>{pwMsg}</div>}
+      <div className="edit-actions">
+        <button className="save-btn" onClick={changePw}>تغيير</button>
+        <button className="cancel-btn" onClick={() => { setPwMode(false); setPwMsg(''); }}>إلغاء</button>
+      </div>
+    </Modal>
+  );
+
+  return (
+    <div className="account-page" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {editMode && editModal}
+      {pwMode && pwModal}
+      <div className="page-header"><h1>حسابي</h1></div>
+      <div className="account-content">
+        <div className="profile-card">
+          <div className="profile-avatar">{initials}</div>
+          <div className="profile-info">
+            <h3>{user.name}</h3>
+            <p>عميلة منذ {user.joined || '2026'}</p>
+          </div>
+          <button className="edit-profile-btn" onClick={openEdit} title="تعديل"><I n="edit" s={18} /></button>
+        </div>
+
+        <div className="sec-title"><I n="mail" s={16} /> معلومات الحساب</div>
+        <div className="info-card">
+          <div className="info-row"><span className="info-label">الاسم</span><span className="info-value">{user.name}</span></div>
+          <div className="info-row"><span className="info-label">البريد</span><span className="info-value" style={{ direction: 'ltr', textAlign: 'right' }}>{user.email}</span></div>
+          <div className="info-row"><span className="info-label">الهاتف</span><span className="info-value" style={{ direction: 'ltr', textAlign: 'right' }}>{user.phone}</span></div>
+        </div>
+
+        <div className="sec-title"><I n="lock" s={16} /> الأمان</div>
+        <div className="info-card">
+          <div className="info-row" style={{ cursor: 'pointer' }} onClick={() => setPwMode(true)}>
+            <span className="info-label">تغيير كلمة المرور</span>
+            <span className="info-value" style={{ color: 'var(--rose)' }}>تعديل</span>
+          </div>
+        </div>
+
+        <div className="sec-title"><I n="mapPin" s={16} /> العناوين</div>
+        <div className="info-card">
+          <div className="addr-item">
+            <div><div className="addr-label">المنزل</div><div className="addr-detail">رام الله، شارع الإرسال</div></div>
+            <span style={{ color: 'var(--rose)', fontSize: '12px', cursor: 'pointer' }}>تعديل</span>
+          </div>
+          <div className="addr-item">
+            <div><div className="addr-label">العمل</div><div className="addr-detail">البيرة، شارع القدس</div></div>
+            <span style={{ color: 'var(--rose)', fontSize: '12px', cursor: 'pointer' }}>تعديل</span>
+          </div>
+        </div>
+
+        <div className="sec-title"><I n="pkg" s={16} /> آخر الطلبات</div>
+        {orders.map(order => (
+          <div className="order-item" key={order.id} onClick={() => setExpanded(expanded === order.id ? null : order.id)}>
+            <div className="order-header">
+              <span className="order-id">{order.id}</span>
+              <span className={`order-status-badge ${statusCls(order.status)}`}>{statusTxt(order.status)}</span>
+            </div>
+            <div className="order-preview">{order.items.map(i => i.name).join(' - ')}</div>
+            <div className="order-footer">
+              <span>{order.total} ₪</span>
+              <span className="order-date">{order.date}</span>
+            </div>
+            <div className={`order-expand ${expanded === order.id ? 'open' : ''}`}>
+              <div className="order-expand-inner">
+                {order.items.map((i, idx) => (
+                  <div className="order-expand-item" key={idx}>
+                    <span>{i.name} x{i.qty}</span>
+                    <span>{i.price * i.qty} ₪</span>
+                  </div>
+                ))}
+                <div style={{ borderTop: '1px solid rgba(194,133,107,0.08)', marginTop: '6px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: 'var(--text-dark)', fontSize: '13px' }}>
+                  <span>المجموع</span><span>{order.total} ₪</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        <button className="logout-btn" onClick={onLogout}><span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><I n="logout" s={18} /> تسجيل الخروج</span></button>
+      </div>
+    </div>
+  );
+}
+
+// ===== APP =====
+function App() {
+  const [currentPage, setCurrentPage] = useState('store');
+  const [direction, setDirection] = useState('left');
+  const [user, setUser] = useState(() => ls.get('bz_user', null));
+  const [theme, setTheme] = useState(() => ls.get('bz_theme', 'light'));
+  const [cart, setCart] = useState(() => ls.get('bz_cart', [
+    { id: 1, name: 'أحمر شفاه مات', category: 'مكياج', price: 89, quantity: 2, icon: 'lipstick', gradient: 'linear-gradient(135deg, #c97b8a, #e8b4c0)' },
+    { id: 2, name: 'كريم ترطيب البشرة', category: 'عناية بالبشرة', price: 120, quantity: 1, icon: 'droplet', gradient: 'linear-gradient(135deg, #4a7c5e, #7db892)' },
+    { id: 4, name: 'ظلال عيون سموكي', category: 'مكياج', price: 95, quantity: 1, icon: 'eyeShadow', gradient: 'linear-gradient(135deg, #8b5a7a, #c492b1)' },
+  ]));
+  const [toast, setToast] = useState(null);
+  const [modal, setModal] = useState(null);
+  const [pendingRemove, setPendingRemove] = useState(null);
+
+  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); ls.set('bz_theme', theme); }, [theme]);
+  useEffect(() => { ls.set('bz_cart', cart); }, [cart]);
+  useEffect(() => { ls.set('bz_user', user); }, [user]);
+
+  const showToast = (msg, type = 'success', undo = null) => setToast({ msg, type, undo });
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
+
+  const navigate = (page) => {
+    const pages = ['store', 'cart', 'account'];
+    const curIdx = pages.indexOf(currentPage);
+    const nextIdx = pages.indexOf(page);
+    setDirection(nextIdx > curIdx ? 'left' : 'right');
+    setTimeout(() => setCurrentPage(page), 30);
+  };
+
+  const handleLogin = (u) => { setUser(u); showToast('مرحبا بعودتك', 'success'); };
+  const handleLogout = () => { setUser(null); setCart([]); navigate('store'); showToast('تم تسجيل الخروج', 'info'); };
+  const handleUpdateUser = (data) => setUser(u => ({ ...u, ...data }));
+
+  const handleAddToCart = (p) => {
+    setCart(c => {
+      const exists = c.find(i => i.id === p.id);
+      if (exists) return c.map(i => i.id === p.id ? { ...i, quantity: i.quantity + 1 } : i);
+      return [...c, { id: p.id, name: p.name, category: p.category, price: p.price, quantity: 1, icon: p.icon, gradient: p.gradient }];
+    });
+    showToast(`أضيف ${p.name} إلى السلة`, 'success');
+  };
+
+  const handleRemoveItem = (item) => {
+    setToast(null);
+    setPendingRemove(item);
+    setCart(c => c.filter(i => i.id !== item.id));
+    showToast(`أزيل ${item.name} من السلة`, 'info', () => {
+      setCart(c => [...c, item]);
+      setPendingRemove(null);
+    });
+  };
+
+  const handleUpdateQty = (id, qty) => setCart(c => c.map(i => i.id === id ? { ...i, quantity: qty } : i));
+
+  const handleCheckout = () => {
+    if (!user) {
+      setModal({ type: 'warning', title: 'تسجيل الدخول مطلوب', msg: 'يرجى تسجيل الدخول أولاً لإتمام الطلب', btn: 'تسجيل الدخول', onClose: () => { setModal(null); navigate('login'); } });
+      return;
+    }
+    const orderText = cart.map(i => `${i.name} x${i.quantity} = ${i.price * i.quantity} ₪`).join('\n');
+    const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+    const msg = encodeURIComponent(`طلب جديد من بيوتي زون\n---\n${orderText}\n---\nالإجمالي: ${total} ₪\n\nالاسم: ${user.name}\nالهاتف: ${user.phone}`);
+    setModal({
+      type: 'success', title: 'تم تجهيز الطلب!', msg: 'سيتم توجيهك إلى واتساب لتأكيد الطلب', btn: 'فتح واتساب',
+      onClose: () => { setModal(null); window.open(`https://wa.me/972500000000?text=${msg}`, '_blank'); }
+    });
+  };
+
+  const isLoginPage = currentPage === 'login';
+  const orders = user ? (ORDERS_BY_USER[user.email] || DEFAULT_ORDERS) : [];
+
+  return (
+    <div className="app-content">
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} onUndo={toast.undo} />}
+      {modal && <Modal type={modal.type} title={modal.title} msg={modal.msg} btn={modal.btn} onClose={modal.onClose} />}
+
+      <div className={`page ${direction === 'left' ? 'slide-left' : 'slide-right'}`} style={{ display: currentPage === 'store' ? 'flex' : 'none', flexDirection: 'column' }}>
+        {currentPage === 'store' && <Store cart={cart} onAdd={handleAddToCart} onNavigate={navigate} />}
+      </div>
+      <div className={`page ${direction === 'left' ? 'slide-left' : 'slide-right'}`} style={{ display: currentPage === 'login' ? 'flex' : 'none', flexDirection: 'column' }}>
+        {currentPage === 'login' && <LoginScreen onLogin={handleLogin} onNavigateToAccount={() => navigate('account')} />}
+      </div>
+      <div className={`page ${direction === 'left' ? 'slide-left' : 'slide-right'}`} style={{ display: currentPage === 'cart' ? 'flex' : 'none', flexDirection: 'column' }}>
+        {currentPage === 'cart' && <CartScreen cart={cart} onUpdateQty={handleUpdateQty} onRemoveItem={handleRemoveItem} onCheckout={handleCheckout} onNavigate={navigate} />}
+      </div>
+      <div className={`page ${direction === 'left' ? 'slide-left' : 'slide-right'}`} style={{ display: currentPage === 'account' ? 'flex' : 'none', flexDirection: 'column' }}>
+        {currentPage === 'account' && <AccountScreen user={user} orders={orders} onLogout={handleLogout} onNavigateToLogin={() => navigate('login')} onUpdateUser={handleUpdateUser} />}
+      </div>
+
+      {!isLoginPage && (
+        <div className="bottom-nav">
+          <button className={`nav-item ${currentPage === 'store' ? 'active' : ''}`} onClick={() => navigate('store')}><I n="shop" /><span>المتجر</span></button>
+          <button className={`nav-item ${currentPage === 'cart' ? 'active' : ''}`} onClick={() => navigate('cart')}><I n="cart" /><span>السلة</span>{cartCount > 0 && <span className="badge">{cartCount}</span>}</button>
+          <button className={`nav-item ${currentPage === 'account' ? 'active' : ''}`} onClick={() => navigate('account')}><I n="user" /><span>حسابي</span></button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== THEME BUTTON =====
+const themeBtn = document.getElementById('themeBtn');
+themeBtn.addEventListener('click', () => {
+  const root = document.documentElement;
+  const current = root.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☾' : '☀';
+  try { localStorage.setItem('bz_theme', JSON.stringify(next)); } catch {}
+});
+(function() {
+  try {
+    const saved = localStorage.getItem('bz_theme');
+    if (saved) {
+      const t = JSON.parse(saved);
+      document.documentElement.setAttribute('data-theme', t);
+      themeBtn.textContent = t === 'dark' ? '☾' : '☀';
+    }
+  } catch {}
+})();
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

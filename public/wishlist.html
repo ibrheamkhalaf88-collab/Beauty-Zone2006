@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>المفضلة — Beauty Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/glow.css"/>
+  <link rel="stylesheet" href="css/luxury.css"/>
+  <link rel="stylesheet" href="css/upgrades.css"/>
+  <style>
+    :root {
+      --gold: #C4A35A;
+      --plum: #8B3A3A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: linear-gradient(180deg, #1a0a12 0%, #2d1020 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      padding: 60px 20px 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 100%, rgba(196,163,90,0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: #fff;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .page-subtitle {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.95rem;
+      position: relative;
+    }
+
+    /* ── Container ── */
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 120px;
+    }
+
+    /* ── Loading ── */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.95rem;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Wishlist Grid ── */
+    .wish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .wish-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .wish-grid { gap: 16px; }
+    }
+
+    /* ── Wish Card ── */
+    .wish-card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      animation: fadeSlideUp 0.5s ease both;
+    }
+
+    .wish-card:hover {
+      border-color: rgba(196,163,90,0.3);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+
+    .wish-img-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wish-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .wish-card:hover .wish-img {
+      transform: scale(1.05);
+    }
+
+    .wish-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--gold);
+      color: #1a0a12;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .wish-body {
+      padding: 20px;
+    }
+
+    .wish-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .wish-price {
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .wish-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .wish-actions button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-family: 'Tajawal', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .add-cart-btn {
+      background: linear-gradient(135deg, var(--gold), #E8D5A3);
+      border: none;
+      color: #1a0a12;
+    }
+
+    .add-cart-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(196,163,90,0.35);
+    }
+
+    .add-cart-btn:active {
+      transform: scale(0.98);
+    }
+
+    .remove-btn {
+      background: rgba(231,76,60,0.1);
+      border: 1px solid rgba(231,76,60,0.2);
+      color: #e74c3c;
+    }
+
+    .remove-btn:hover {
+      background: rgba(231,76,60,0.2);
+      transform: translateY(-2px);
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 100px 20px;
+      animation: fadeSlideUp 0.6s ease;
+    }
+
+    .empty-icon {
+      font-size: 5rem;
+      margin-bottom: 24px;
+    }
+
+    .empty-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .empty-text {
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 28px;
+      font-size: 1rem;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .empty-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, var(--gold), #E8D5A3);
+      color: #1a0a12;
+      border-radius: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .empty-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(196,163,90,0.4);
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 700;
+      z-index: 99999;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.toast-success {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(39,174,96,0.4);
+    }
+
+    .toast.toast-error {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(231,76,60,0.4);
+    }
+
+    /* ── Mobile Bottom Nav ── */
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26,10,18,0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      padding: 8px 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      z-index: 1000;
+    }
+
+    .mbn-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.7rem;
+      padding: 8px;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+
+    .mbn-item.active { color: var(--gold); }
+    .mbn-item:hover { color: rgba(255,255,255,0.8); }
+
+    .mbn-icon { width: 24px; height: 24px; }
+
+    .mbn-badge {
+      position: absolute;
+      top: -4px;
+      right: -8px;
+      background: #e74c3c;
+      color: #fff;
+      font-size: 0.65rem;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .mbn-cart-bubble { position: relative; }
+
+    /* ── Profile Bar ── */
+    .profile-bar {
+      background: linear-gradient(135deg, #7B2D8B, #3d1050);
+      color: #fff;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+    }
+
+    .profile-bar a {
+      color: var(--gold);
+      font-weight: 700;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Profile Bar (shown when logged in) -->
+  <div class="profile-bar" id="profile-bar" style="display:none">
+    مرحباً <strong id="logged-user-name"></strong>
+    <span style="margin:0 10px">|</span>
+    <a href="account.html">حسابي</a>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">❤️ قائمة المفضلة</h1>
+      <p class="page-subtitle"> Beauty Zone — منتجاتك المفضلة في مكان واحد</p>
+    </div>
+
+    <div class="page-container">
+      <div id="wishlist-content">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text">جاري تحميل المفضلة...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="mbn-item">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="mbn-label">الرئيسية</span>
+    </a>
+    <a href="search.html" class="mbn-item">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="mbn-label">بحث</span>
+    </a>
+    <a href="cart.html" class="mbn-item">
+      <div class="mbn-cart-bubble">
+        <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        <span class="mbn-badge" id="mbn-cart-badge" style="display:none">0</span>
+      </div>
+      <span class="mbn-label">السلة</span>
+    </a>
+    <a href="wishlist.html" class="mbn-item active">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="mbn-label">المفضلة</span>
+    </a>
+    <a href="account.html" class="mbn-item">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="mbn-label">حسابي</span>
+    </a>
+  </nav>
+
+  <script src="js/api.js"></script>
+  <script src="js/glow-data.js"></script>
+  <script src="js/glow-main.js"></script>
+  <script>
+    // ── State ──
+    let _prodCache = [];
+
+    // ── Toast ──
+    function showToast(message, isError) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast' + (isError ? ' toast-error' : ' toast-success');
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    // ── Get Wishlist ──
+    function getWishlistIds() {
+      if (typeof DB !== 'undefined' && DB.getWishlist) return DB.getWishlist();
+      return JSON.parse(localStorage.getItem('bz_wishlist') || '[]');
+    }
+
+    // ── Get Products ──
+    async function getProducts() {
+      try { _prodCache = await API.getProducts(); } catch(e) { _prodCache = DB ? DB.getProducts() : []; }
+    }
+
+    // ── Remove from Wishlist ──
+    window.removeFromWishlist = function(id) {
+      if (typeof DB !== 'undefined' && DB.removeFromWishlist) {
+        DB.removeFromWishlist(id);
+      } else {
+        const list = JSON.parse(localStorage.getItem('bz_wishlist') || '[]').filter(x => x !== id);
+        localStorage.setItem('bz_wishlist', JSON.stringify(list));
+      }
+      showToast('تم الحذف من المفضلة');
+      renderWishlist();
+    };
+
+    // ── Move to Cart ──
+    window.moveToCart = async function(id) {
+      const cart = (typeof API !== 'undefined' && API.getCartLocal) ? API.getCartLocal() : [];
+
+      if (!cart.find(c => c.id === id)) {
+        cart.push({ id: id, qty: 1 });
+        if (typeof API !== 'undefined' && API.saveCartLocal) API.saveCartLocal(cart);
+      }
+
+      if (typeof API !== 'undefined' && API.addToCart) {
+        try { await API.addToCart(id, 1); } catch(e) {}
+      }
+
+      // Remove from wishlist
+      removeFromWishlist(id);
+
+      showToast('تم نقل المنتج للسلة ✓');
+
+      // Update cart badge
+      const badge = document.getElementById('mbn-cart-badge');
+      if (badge) {
+        const count = cart.reduce((s, c) => s + (c.qty || 1), 0);
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+      }
+    };
+
+    // ── Render Wishlist ──
+    async function renderWishlist() {
+      const container = document.getElementById('wishlist-content');
+
+      let wishlistIds;
+      try {
+        wishlistIds = getWishlistIds();
+      } catch(e) {
+        wishlistIds = [];
+      }
+
+      if (!wishlistIds.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">💕</div>
+            <h2 class="empty-title">المفضلة فارغة</h2>
+            <p class="empty-text">أضيفي المنتجات التي تعجبك لحفظها هنا وتسهيل الوصول إليها</p>
+            <a href="index.html" class="empty-btn">
+              <span>✨</span> تصفّحي المنتجات
+            </a>
+          </div>`;
+        return;
+      }
+
+      const wishProducts = wishlistIds.map(id => {
+        return _prodCache.find(p => p.id === id);
+      }).filter(Boolean);
+
+      if (!wishProducts.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">😕</div>
+            <h2 class="empty-title">لا توجد منتجات</h2>
+            <p class="empty-text">المنتجات في المفضلة غير متاحة حالياً</p>
+            <a href="index.html" class="empty-btn">
+              <span>✨</span> تصفّحي المنتجات
+            </a>
+          </div>`;
+        return;
+      }
+
+      const html = wishProducts.map((p, idx) => {
+        const img = (p.images && p.images[0]) ? p.images[0] : 'assets/test-product.jpeg';
+        return `
+          <div class="wish-card" style="animation-delay:${idx * 0.07}s">
+            <div class="wish-img-wrap">
+              <img src="${img}" alt="${p.nameAR}" class="wish-img" onerror="this.src='assets/test-product.jpeg'" />
+              ${p.featured ? '<span class="wish-badge">مميز</span>' : ''}
+            </div>
+            <div class="wish-body">
+              <div class="wish-name">${p.nameAR}</div>
+              <div class="wish-price">${p.price || 0} ₪</div>
+              <div class="wish-actions">
+                <button class="add-cart-btn" onclick="moveToCart('${p.id}')">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                  أضف للسلة
+                </button>
+                <button class="remove-btn" onclick="removeFromWishlist('${p.id}')">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      container.innerHTML = `<div class="wish-grid">${html}</div>`;
+    }
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check if logged in
+      try {
+        const user = await API.getMe();
+        if (user) {
+          const profileBar = document.getElementById('profile-bar');
+          const userNameEl = document.getElementById('logged-user-name');
+          if (profileBar && userNameEl) {
+            profileBar.style.display = 'block';
+            userNameEl.textContent = user.name || user.phone;
+          }
+        }
+      } catch(e) {}
+
+      await getProducts();
+
+      // Small delay for smooth UX
+      setTimeout(renderWishlist, 300);
+    });
+  </script>
+</body>
+</html>

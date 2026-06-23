@@ -2,6 +2,25 @@ node_modules/
 dist/
 build/
 .env
+server/.env
 *.log
 .DS_Store
 Thumbs.db
+
+# SQLite database (generated at runtime)
+server/beautyzone.db
+
+# Uploaded files (don't commit user uploads)
+server/uploads/images/*
+server/uploads/videos/*
+server/uploads/temp/*
+!server/uploads/images/.gitkeep
+!server/uploads/videos/.gitkeep
+!server/uploads/temp/.gitkeep
+
+# Archive (old backups — not needed)
+_archive/
+
+# PM2 / process manager
+*.pid
+ecosystem.config.js

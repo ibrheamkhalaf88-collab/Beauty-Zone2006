@@ -1,0 +1,18 @@
+{
+  "generated": "2026-06-17T12:40:00+03:00",
+  "sections": [
+    {
+      "id": "mockups",
+      "label": "Mockups",
+      "groups": [
+        {
+          "slug": "beauty-zone-prototype",
+          "label": "بيوتي زون — بروتوتايب تفاعلي",
+          "files": [
+            { "label": "البروتوتايب الكامل", "path": "mockups/beauty-zone-prototype/index.html" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>حسابي — Beauty Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/glow.css"/>
+  <link rel="stylesheet" href="css/luxury.css"/>
+  <link rel="stylesheet" href="css/upgrades.css"/>
+  <style>
+    :root {
+      --rose: #C2856B;
+      --plum: #8B3A3A;
+      --gold: #C4A35A;
+      --warm-bg: #F5EDE3;
+      --surface: #FFF8F2;
+      --text-dark: #2C1810;
+      --text-mid: #6B4C3B;
+      --text-light: #9C7A6A;
+      --radius: 20px;
+      --radius-sm: 12px;
+      --shadow-sm: 0 4px 20px rgba(44,24,16,0.08);
+      --shadow-md: 0 8px 40px rgba(44,24,16,0.14);
+      --shadow-lg: 0 20px 70px rgba(44,24,16,0.2);
+      --gradient-primary: linear-gradient(135deg, #8B3A3A, #C2856B);
+      --gradient-gold: linear-gradient(135deg, #C4A35A, #E8D5A3);
+      --gradient-hero: linear-gradient(135deg, #1a0a12, #3d1525, #5c2240);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--warm-bg);
+      min-height: 100vh;
+    }
+
+    .page-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Auth Screen (Guest) ── */
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a0a12 0%, #3d1525 50%, #5c2240 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(196,163,90,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(139,58,58,0.2) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .auth-card {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 28px;
+      padding: 40px;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 2;
+      animation: fadeSlideUp 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-logo h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .auth-logo p {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.95rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+      background: none;
+    }
+
+    .auth-tab.active {
+      background: var(--gradient-gold);
+      color: #1a0a12;
+    }
+
+    .auth-tab:not(.active):hover {
+      color: #fff;
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .form-input::placeholder {
+      color: rgba(255,255,255,0.35);
+    }
+
+    .form-input:focus {
+      border-color: var(--gold);
+      background: rgba(255,255,255,0.12);
+      box-shadow: 0 0 0 3px rgba(196,163,90,0.15);
+    }
+
+    .auth-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--gradient-gold);
+      color: #1a0a12;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 8px;
+    }
+
+    .auth-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(196,163,90,0.4);
+    }
+
+    .auth-submit:active {
+      transform: scale(0.98);
+    }
+
+    .auth-error {
+      background: rgba(231,76,60,0.15);
+      border: 1px solid rgba(231,76,60,0.3);
+      color: #ff8a80;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      display: none;
+      text-align: center;
+    }
+
+    .auth-error.show {
+      display: block;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    .auth-divider {
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      margin: 24px 0;
+      position: relative;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .auth-divider::before { right: 0; }
+    .auth-divider::after { left: 0; }
+
+    .social-login {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .social-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .social-btn:hover {
+      background: rgba(255,255,255,0.12);
+      transform: translateY(-2px);
+    }
+
+    .terms-text {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.78rem;
+      text-align: center;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    .terms-text a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    /* ── Account Dashboard (Logged In) ── */
+    .account-screen {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #1a0a12 0%, #2d1020 100%);
+      padding-bottom: 100px;
+    }
+
+    .account-header {
+      background: linear-gradient(135deg, #1a0a12, #3d1525);
+      padding: 60px 20px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .account-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 100%, rgba(196,163,90,0.2) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .account-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--gradient-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 2.5rem;
+      box-shadow: 0 8px 32px rgba(196,163,90,0.3);
+      border: 4px solid rgba(255,255,255,0.1);
+      position: relative;
+      z-index: 2;
+    }
+
+    .account-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .account-email {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.95rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Points Card ── */
+    .points-card {
+      background: var(--gradient-gold);
+      border-radius: 20px;
+      padding: 24px;
+      margin: -50px auto 24px;
+      max-width: 340px;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 12px 40px rgba(196,163,90,0.35);
+      animation: fadeSlideUp 0.6s 0.1s both;
+    }
+
+    .points-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .points-label {
+      font-size: 0.9rem;
+      color: #5c4a1a;
+      font-weight: 600;
+    }
+
+    .points-icon {
+      font-size: 1.8rem;
+    }
+
+    .points-balance {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: #2C1810;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .points-subtext {
+      font-size: 0.82rem;
+      color: #6b5a2a;
+    }
+
+    .points-progress {
+      margin-top: 16px;
+    }
+
+    .points-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: #5c4a1a;
+      margin-bottom: 6px;
+    }
+
+    .points-progress-bar {
+      height: 8px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .points-progress-fill {
+      height: 100%;
+      background: #2C1810;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    .points-history-btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px;
+      background: rgba(0,0,0,0.1);
+      border: none;
+      border-radius: 10px;
+      color: #5c4a1a;
+      font-family: 'Tajawal', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .points-history-btn:hover {
+      background: rgba(0,0,0,0.15);
+    }
+
+    /* ── Account Content ── */
+    .account-content {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .account-section {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+      animation: fadeSlideUp 0.5s ease both;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+
+    .section-edit-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--gold);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    .section-edit-btn:hover {
+      background: rgba(196,163,90,0.15);
+      border-color: var(--gold);
+    }
+
+    /* ── Info Rows ── */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-value {
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* ── Orders ── */
+    .order-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .order-header:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .order-id {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .order-date {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    .order-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .status-new { background: rgba(243,156,18,0.2); color: #f39c12; }
+    .status-processing { background: rgba(41,128,185,0.2); color: #3498db; }
+    .status-shipped { background: rgba(142,68,173,0.2); color: #9b59b6; }
+    .status-delivered { background: rgba(39,174,96,0.2); color: #2ecc71; }
+    .status-cancelled { background: rgba(231,76,60,0.2); color: #e74c3c; }
+
+    .order-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      padding: 0 16px;
+    }
+
+    .order-card.expanded .order-body {
+      max-height: 500px;
+      padding: 0 16px 16px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.88rem;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 12px;
+      margin-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* ── Address ── */
+    .address-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    .address-text {
+      flex: 1;
+    }
+
+    .address-label {
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .address-details {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .address-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .addr-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .addr-btn:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    .add-address-btn {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 14px;
+      color: rgba(255,255,255,0.5);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .add-address-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(196,163,90,0.05);
+    }
+
+    /* ── Logout ── */
+    .logout-btn {
+      width: 100%;
+      padding: 16px;
+      background: rgba(231,76,60,0.1);
+      border: 1px solid rgba(231,76,60,0.2);
+      border-radius: 14px;
+      color: #e74c3c;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(231,76,60,0.2);
+      transform: translateY(-2px);
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .empty-state h4 {
+      color: rgba(255,255,255,0.6);
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 600;
+      z-index: 99999;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.toast-error {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+
+    /* ── Loading ── */
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+    }
+
+    /* ── Mobile Bottom Nav ── */
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26,10,18,0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      padding: 8px 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      z-index: 1000;
+    }
+
+    .mbn-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.7rem;
+      padding: 8px;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+
+    .mbn-item.active {
+      color: var(--gold);
+    }
+
+    .mbn-item:hover {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .mbn-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ── Profile Bar ── */
+    .profile-bar {
+      background: linear-gradient(135deg, #7B2D8B, #3d1050);
+      color: #fff;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+    }
+
+    .profile-bar a {
+      color: var(--gold);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 28px 20px;
+        border-radius: 20px;
+      }
+
+      .account-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+      }
+
+      .points-card {
+        margin: -40px 16px 20px;
+        max-width: none;
+      }
+
+      .points-balance {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Profile Bar (shown when logged in) -->
+  <div class="profile-bar" id="profile-bar" style="display:none">
+    مرحباً <strong id="logged-user-name"></strong>
+    <span style="margin:0 10px">|</span>
+    <a href="account.html">حسابي</a>
+  </div>
+
+  <!-- Main Container -->
+  <div id="main-container"></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/glow-data.js"></script>
+  <script src="js/glow-main.js"></script>
+  <script>
+    // ── Config ──
+    const POINTS_PER_100_SHEKELS = 20; // 20 points for every 100 shekels
+    const FREE_SHIPPING_POINTS = 500;   // Points needed for free shipping reward
+    const POINTS_TO_SHEKEL = 0.05;      // 1 point = 0.05 shekel discount
+
+    // ── State ──
+    let _currentUser = null;
+    let _isLoggedIn = false;
+
+    // ── Toast ──
+    function showToast(message, isError) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast' + (isError ? ' toast-error' : '');
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    // ── Get User ──
+    async function getCurrentUser() {
+      if (_currentUser) return _currentUser;
+      try {
+        _currentUser = await API.getMe();
+        _isLoggedIn = !!_currentUser;
+      } catch(e) {
+        _currentUser = null;
+        _isLoggedIn = false;
+      }
+      return _currentUser;
+    }
+
+    // ── Calculate Points ──
+    function calculatePoints(totalSpent) {
+      return Math.floor((totalSpent / 100) * POINTS_PER_100_SHEKELS);
+    }
+
+    // ── Format Date ──
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      return new Date(dateStr).toLocaleDateString('ar-SA', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
+
+    // ── Get Status Class ──
+    function getStatusClass(status) {
+      const map = {
+        'جديد': 'status-new',
+        'قيد_التجهيز': 'status-processing',
+        'تم_الشحن': 'status-shipped',
+        'مكتمل': 'status-delivered',
+        'ملغي': 'status-cancelled'
+      };
+      return map[status] || 'status-new';
+    }
+
+    // ── Get Status Label ──
+    function getStatusLabel(status) {
+      const map = {
+        'جديد': 'جديد',
+        'قيد_التجهيز': 'قيد التجهيز',
+        'تم_الشحن': 'تم الشحن',
+        'مكتمل': 'تم التسليم',
+        'ملغي': 'ملغي'
+      };
+      return map[status] || status || 'جديد';
+    }
+
+    // ── Render Loading ──
+    function renderLoading() {
+      return `
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <div class="loading-text">جاري التحميل...</div>
+        </div>`;
+    }
+
+    // ── Render Auth Screen ──
+    function renderAuthScreen() {
+      return `
+        <div class="auth-screen">
+          <div class="auth-card">
+            <div class="auth-logo">
+              <h1>Beauty Zone</h1>
+              <p>بيوتي زون — جمالك، بلمسة فرق</p>
+            </div>
+
+            <div class="auth-tabs">
+              <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">تسجيل الدخول</button>
+              <button class="auth-tab" data-tab="register" onclick="switchTab('register')">حساب جديد</button>
+            </div>
+
+            <div id="auth-error" class="auth-error"></div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="login-form" onsubmit="handleLogin(event)">
+              <div class="form-group">
+                <label class="form-label">رقم الهاتف</label>
+                <input type="tel" class="form-input" id="login-phone" placeholder="05xxxxxxxx" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">كلمة المرور</label>
+                <input type="password" class="form-input" id="login-password" placeholder="أدخلي كلمة المرور" required />
+              </div>
+              <button type="submit" class="auth-submit">تسجيل الدخول</button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="register-form" onsubmit="handleRegister(event)">
+              <div class="form-group">
+                <label class="form-label">الاسم الكامل</label>
+                <input type="text" class="form-input" id="reg-name" placeholder="اسمك الكامل" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">رقم الهاتف</label>
+                <input type="tel" class="form-input" id="reg-phone" placeholder="05xxxxxxxx" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">البريد الإلكتروني (اختياري)</label>
+                <input type="email" class="form-input" id="reg-email" placeholder="email@example.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">كلمة المرور</label>
+                <input type="password" class="form-input" id="reg-password" placeholder="6 أحرف على الأقل" required minlength="6" />
+              </div>
+              <button type="submit" class="auth-submit">إنشاء الحساب</button>
+            </form>
+
+            <p class="terms-text">
+              بالتسجيل، أوافق على <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a>
+            </p>
+          </div>
+        </div>`;
+    }
+
+    // ── Switch Tab ──
+    window.switchTab = function(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      document.querySelectorAll('.auth-form').forEach(f => {
+        f.classList.toggle('active', f.id === tab + '-form');
+      });
+      document.getElementById('auth-error').classList.remove('show');
+    };
+
+    // ── Handle Login ──
+    window.handleLogin = async function(e) {
+      e.preventDefault();
+      const errorEl = document.getElementById('auth-error');
+      errorEl.classList.remove('show');
+
+      const phone = document.getElementById('login-phone').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      if (!phone || !password) {
+        errorEl.textContent = 'أدخلي جميع الحقول';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      try {
+        const result = await API.login(phone, password);
+        _currentUser = result.user || result;
+        _isLoggedIn = true;
+
+        // Update profile bar if exists
+        const profileBar = document.getElementById('profile-bar');
+        const userNameEl = document.getElementById('logged-user-name');
+        if (profileBar && userNameEl) {
+          profileBar.style.display = 'block';
+          userNameEl.textContent = _currentUser.name || _currentUser.phone;
+        }
+
+        showToast('مرحباً بكِ ' + (_currentUser.name || '') + '!');
+        await renderAccountScreen();
+      } catch(err) {
+        errorEl.textContent = err.message || 'خطأ في تسجيل الدخول';
+        errorEl.classList.add('show');
+      }
+    };
+
+    // ── Handle Register ──
+    window.handleRegister = async function(e) {
+      e.preventDefault();
+      const errorEl = document.getElementById('auth-error');
+      errorEl.classList.remove('show');
+
+      const name = document.getElementById('reg-name').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+
+      if (!name || name.length < 2) {
+        errorEl.textContent = 'الاسم حرفين على الأقل';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      if (!/^(059|056)\d{7}$/.test(phone)) {
+        errorEl.textContent = 'رقم الهاتف يجب أن يبدأ بـ 059 أو 056';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      if (password.length < 6) {
+        errorEl.textContent = 'كلمة المرور 6 أحرف على الأقل';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      try {
+        await API.register({ name, phone, email, password });
+        showToast('تم إنشاء الحساب بنجاح!');
+        await handleLogin({ preventDefault: () => {} });
+        document.getElementById('login-phone').value = phone;
+        document.getElementById('login-password').value = password;
+        await handleLogin({ preventDefault: () => {} });
+      } catch(err) {
+        errorEl.textContent = err.message || 'خطأ في إنشاء الحساب';
+        errorEl.classList.add('show');
+      }
+    };
+
+    // ── Render Account Screen (Logged In) ──
+    async function renderAccountScreen() {
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      const container = document.getElementById('main-container');
+
+      // Get user orders
+      let orders = [];
+      let totalSpent = 0;
+      try {
+        orders = await API.getOrders();
+        totalSpent = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+      } catch(e) {
+        orders = [];
+      }
+
+      // Calculate points
+      const pointsBalance = calculatePoints(totalSpent);
+      const pointsToNextReward = Math.max(0, FREE_SHIPPING_POINTS - (pointsBalance % FREE_SHIPPING_POINTS));
+      const progressPercent = Math.min(100, (pointsBalance % FREE_SHIPPING_POINTS) / FREE_SHIPPING_POINTS * 100);
+
+      // Get addresses from localStorage
+      const addresses = JSON.parse(localStorage.getItem('bz_addresses') || '{}')[user.id || user.phone] || [];
+
+      container.innerHTML = `
+        <div class="account-screen">
+          <!-- Header -->
+          <div class="account-header">
+            <div class="account-avatar">
+              ${(user.name || user.phone || '؟').charAt(0)}
+            </div>
+            <h1 class="account-name">${user.name || 'عميلة بيوتي زون'}</h1>
+            <p class="account-email">${user.email || user.phone || ''}</p>
+          </div>
+
+          <!-- Points Card -->
+          <div class="points-card">
+            <div class="points-header">
+              <span class="points-label">نقاطي</span>
+              <span class="points-icon">⭐</span>
+            </div>
+            <div class="points-balance">${pointsBalance}</div>
+            <div class="points-subtext">
+              مكافآتك — ${POINTS_PER_100_SHEKELS} نقطة لكل 100 ₪ مشتريات
+            </div>
+            <div class="points-progress">
+              <div class="points-progress-label">
+                <span>المتبقي للوصول لمكافأة الشحن المجاني</span>
+                <span>${FREE_SHIPPING_POINTS - (pointsBalance % FREE_SHIPPING_POINTS)} نقطة</span>
+              </div>
+              <div class="points-progress-bar">
+                <div class="points-progress-fill" style="width:${progressPercent}%"></div>
+              </div>
+            </div>
+            <button class="points-history-btn" onclick="alert('قريباً: سجل النقاط والمكافآت')">
+              📜 سجل النقاط
+            </button>
+          </div>
+
+          <div class="account-content">
+            <!-- Account Info Section -->
+            <div class="account-section" style="animation-delay:0.1s">
+              <div class="section-header">
+                <h2 class="section-title">معلومات الحساب</h2>
+                <button class="section-edit-btn" onclick="openEditProfile()">✏️ تعديل</button>
+              </div>
+              <div class="info-row">
+                <span class="info-label">👤 الاسم</span>
+                <span class="info-value">${user.name || '—'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">📱 الهاتف</span>
+                <span class="info-value">${user.phone || '—'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">✉️ البريد</span>
+                <span class="info-value">${user.email || '—'}</span>
+              </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div class="account-section" style="animation-delay:0.2s">
+              <div class="section-header">
+                <h2 class="section-title">طلباتي</h2>
+              </div>
+              ${orders.length ? orders.map(o => `
+                <div class="order-card">
+                  <div class="order-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <div>
+                      <div class="order-id">طلب #${(o.id || '').slice(-6).toUpperCase()}</div>
+                      <div class="order-date">${formatDate(o.created_at)}</div>
+                    </div>
+                    <span class="order-status ${getStatusClass(o.status)}">${getStatusLabel(o.status)}</span>
+                  </div>
+                  <div class="order-body">
+                    ${(o.items || []).map(item => `
+                      <div class="order-item">
+                        <span>${item.name || 'منتج'} × ${item.qty || 1}</span>
+                        <span>${(item.price || 0) * (item.qty || 1)} ₪</span>
+                      </div>
+                    `).join('')}
+                    <div class="order-total">
+                      <span>الإجمالي</span>
+                      <span>${o.total || 0} ₪</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('') : `
+                <div class="empty-state">
+                  <div class="empty-state-icon">📦</div>
+                  <h4>لا توجد طلبات</h4>
+                  <p>لم تقم بأي طلب بعد</p>
+                </div>
+              `}
+            </div>
+
+            <!-- Addresses Section -->
+            <div class="account-section" style="animation-delay:0.3s">
+              <div class="section-header">
+                <h2 class="section-title">عناوين التوصيل</h2>
+              </div>
+              ${addresses.length ? addresses.map((addr, i) => `
+                <div class="address-item">
+                  <div class="address-text">
+                    <div class="address-label">${addr.label || 'عنوان'}</div>
+                    <div class="address-details">${addr.city || ''} ${addr.detail || ''}</div>
+                  </div>
+                  <div class="address-actions">
+                    <button class="addr-btn" onclick="editAddress(${i})" title="تعديل">✏️</button>
+                    <button class="addr-btn" onclick="deleteAddress(${i})" title="حذف">🗑️</button>
+                  </div>
+                </div>
+              `).join('') : `
+                <div class="empty-state">
+                  <div class="empty-state-icon">📍</div>
+                  <h4>لا توجد عناوين</h4>
+                  <p>أضيفي عنواناً للتوصيل السريع</p>
+                </div>
+              `}
+              <button class="add-address-btn" onclick="openAddAddress()">
+                ➕ إضافة عنوان جديد
+              </button>
+            </div>
+
+            <!-- Password Change -->
+            <div class="account-section" style="animation-delay:0.4s">
+              <div class="section-header">
+                <h2 class="section-title">تغيير كلمة المرور</h2>
+              </div>
+              <form onsubmit="handleChangePassword(event)">
+                <div class="form-group" style="margin-bottom:12px">
+                  <input type="password" class="form-input" id="cp-old" placeholder="كلمة المرور الحالية" style="background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);" required />
+                </div>
+                <div class="form-group" style="margin-bottom:12px">
+                  <input type="password" class="form-input" id="cp-new" placeholder="كلمة المرور الجديدة" style="background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);" required minlength="6" />
+                </div>
+                <div class="form-group" style="margin-bottom:12px">
+                  <input type="password" class="form-input" id="cp-confirm" placeholder="تأكيد كلمة المرور" style="background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);" required />
+                </div>
+                <button type="submit" class="auth-submit" style="background:var(--gradient-primary);margin-top:8px">تغيير كلمة المرور</button>
+              </form>
+            </div>
+
+            <!-- Logout -->
+            <button class="logout-btn" onclick="handleLogout()">
+              🚪 تسجيل الخروج
+            </button>
+          </div>
+        </div>
+
+        <nav class="mobile-bottom-nav">
+          <a href="index.html" class="mbn-item">
+            <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="mbn-label">الرئيسية</span>
+          </a>
+          <a href="search.html" class="mbn-item">
+            <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="mbn-label">بحث</span>
+          </a>
+          <a href="cart.html" class="mbn-item">
+            <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+            <span class="mbn-label">السلة</span>
+          </a>
+          <a href="wishlist.html" class="mbn-item">
+            <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="mbn-label">المفضلة</span>
+          </a>
+          <a href="chat.html" class="mbn-item">
+            <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="mbn-label">شات</span>
+          </a>
+          <a href="account.html" class="mbn-item active">
+            <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="mbn-label">حسابي</span>
+          </a>
+        </nav>
+      `;
+    }
+
+    // ── Handle Change Password ──
+    window.handleChangePassword = async function(e) {
+      e.preventDefault();
+      const oldPass = document.getElementById('cp-old').value;
+      const newPass = document.getElementById('cp-new').value;
+      const confirmPass = document.getElementById('cp-confirm').value;
+
+      if (newPass !== confirmPass) {
+        showToast('كلمة المرور غير متطابقة', true);
+        return;
+      }
+
+      if (newPass.length < 6) {
+        showToast('كلمة المرور 6 أحرف على الأقل', true);
+        return;
+      }
+
+      try {
+        await API.updateProfile({ currentPassword: oldPass, password: newPass });
+        showToast('تم تغيير كلمة المرور بنجاح ✓');
+        e.target.reset();
+      } catch(err) {
+        showToast(err.message || 'خطأ في تغيير كلمة المرور', true);
+      }
+    };
+
+    // ── Handle Logout ──
+    window.handleLogout = function() {
+      API.logout();
+      _currentUser = null;
+      _isLoggedIn = false;
+      showToast('تم تسجيل الخروج');
+      document.getElementById('main-container').innerHTML = renderAuthScreen();
+    };
+
+    // ── Address Functions ──
+    window.openAddAddress = function() {
+      const addr = { label: '', city: '', detail: '' };
+      const label = prompt('تسمية العنوان (مثال: المنزل، العمل):', '');
+      if (!label) return;
+      addr.label = label;
+      addr.city = prompt('المدينة:', '');
+      if (!addr.city) return;
+      addr.detail = prompt('العنوان بالتفصيل:', '');
+      if (!addr.detail) return;
+
+      const user = _currentUser;
+      if (!user) return;
+
+      const all = JSON.parse(localStorage.getItem('bz_addresses') || '{}');
+      const key = user.id || user.phone;
+      if (!all[key]) all[key] = [];
+      all[key].push(addr);
+      localStorage.setItem('bz_addresses', JSON.stringify(all));
+
+      showToast('تم إضافة العنوان ✓');
+      renderAccountScreen();
+    };
+
+    window.editAddress = function(idx) {
+      const user = _currentUser;
+      if (!user) return;
+
+      const all = JSON.parse(localStorage.getItem('bz_addresses') || '{}');
+      const key = user.id || user.phone;
+      const addrs = all[key] || [];
+      const addr = addrs[idx];
+      if (!addr) return;
+
+      const label = prompt('تسمية العنوان:', addr.label);
+      if (!label) return;
+      addr.label = label;
+      addr.city = prompt('المدينة:', addr.city) || addr.city;
+      addr.detail = prompt('العنوان:', addr.detail) || addr.detail;
+
+      all[key] = addrs;
+      localStorage.setItem('bz_addresses', JSON.stringify(all));
+
+      showToast('تم تحديث العنوان ✓');
+      renderAccountScreen();
+    };
+
+    window.deleteAddress = function(idx) {
+      if (!confirm('حذف هذا العنوان؟')) return;
+
+      const user = _currentUser;
+      if (!user) return;
+
+      const all = JSON.parse(localStorage.getItem('bz_addresses') || '{}');
+      const key = user.id || user.phone;
+      const addrs = all[key] || [];
+      addrs.splice(idx, 1);
+      all[key] = addrs;
+      localStorage.setItem('bz_addresses', JSON.stringify(all));
+
+      showToast('تم حذف العنوان');
+      renderAccountScreen();
+    };
+
+    window.openEditProfile = async function() {
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      const name = prompt('الاسم الكامل:', user.name || '');
+      if (name === null) return;
+      const email = prompt('البريد الإلكتروني:', user.email || '');
+      if (email === null) return;
+
+      try {
+        await API.updateProfile({ name, email });
+        _currentUser = null; // Clear cache
+        showToast('تم تحديث المعلومات ✓');
+        renderAccountScreen();
+      } catch(err) {
+        showToast(err.message || 'خطأ في التحديث', true);
+      }
+    };
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', async () => {
+      const container = document.getElementById('main-container');
+      container.innerHTML = renderLoading();
+
+      const user = await getCurrentUser();
+
+      if (!user) {
+        container.innerHTML = renderAuthScreen();
+      } else {
+        // Update profile bar
+        const profileBar = document.getElementById('profile-bar');
+        const userNameEl = document.getElementById('logged-user-name');
+        if (profileBar && userNameEl) {
+          profileBar.style.display = 'block';
+          userNameEl.textContent = user.name || user.phone;
+        }
+
+        await renderAccountScreen();
+      }
+    });
+  </script>
+</body>
+</html>

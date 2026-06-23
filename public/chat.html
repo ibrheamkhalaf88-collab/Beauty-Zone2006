@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>المحادثة — Beauty Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/glow.css"/>
+  <link rel="stylesheet" href="css/luxury.css"/>
+  <link rel="stylesheet" href="css/upgrades.css"/>
+  <style>
+    :root {
+      --gold: #C4A35A;
+      --plum: #8B3A3A;
+      --warm-bg: #F5EDE3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: linear-gradient(180deg, #1a0a12 0%, #2d1020 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    /* ── Header ── */
+    .chat-header {
+      padding: 50px 20px 16px;
+      text-align: center;
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .chat-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 100%, rgba(196,163,90,0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .chat-header .back-btn {
+      position: absolute;
+      right: 16px;
+      top: 50px;
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .chat-header .back-btn:hover { background: rgba(255,255,255,0.14); }
+
+    .chat-avatar-lg {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #E8D5A3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin: 0 auto 10px;
+    }
+
+    .chat-header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; color: #fff;
+    }
+
+    .chat-header-sub {
+      font-size: 0.8rem; color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+    }
+
+    /* ── Order Info Bar ── */
+    .order-info-bar {
+      background: rgba(196,163,90,0.1);
+      border: 1px solid rgba(196,163,90,0.2);
+      margin: 16px;
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .oib-order { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .oib-order strong { color: var(--gold); font-size: 0.95rem; }
+    .oib-amount { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+    .oib-status {
+      font-size: 0.78rem; padding: 4px 10px;
+      border-radius: 20px; font-weight: 600;
+    }
+    .oib-status.pending { background: rgba(241,196,15,0.15); color: #f1c40f; }
+    .oib-status.confirmed { background: rgba(39,174,96,0.15); color: #2ecc71; }
+    .oib-status.rejected { background: rgba(231,76,60,0.15); color: #e74c3c; }
+
+    /* ── Messages ── */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .msg-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 82%;
+      animation: fadeSlideUp 0.3s ease;
+    }
+
+    .msg-wrap.admin { align-self: flex-start; }
+    .msg-wrap.user { align-self: flex-end; align-items: flex-end; }
+    .msg-wrap.system { align-self: center; max-width: 90%; }
+
+    .msg-bubble {
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg-wrap.admin .msg-bubble {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px 18px 18px 18px;
+      color: #fff;
+    }
+
+    .msg-wrap.user .msg-bubble {
+      background: linear-gradient(135deg, var(--gold), #E8D5A3);
+      color: #1a0a12;
+      border-radius: 18px 4px 18px 18px;
+    }
+
+    .msg-wrap.system .msg-bubble {
+      background: rgba(39,174,96,0.12);
+      border: 1px solid rgba(39,174,96,0.3);
+      color: #2ecc71;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 0.88rem;
+      padding: 10px 16px;
+    }
+
+    .msg-time {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.3);
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .msg-wrap.user .msg-time { text-align: left; }
+
+    /* Receipt message */
+    .msg-receipt {
+      background: rgba(39,174,96,0.1);
+      border: 1px solid rgba(39,174,96,0.3);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 8px;
+    }
+
+    .msg-receipt-img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .msg-receipt-label {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 4px;
+    }
+
+    .msg-receipt-amount {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2ecc71;
+    }
+
+    .msg-receipt-ref {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 4px;
+    }
+
+    /* ── Chat Input ── */
+    .chat-input-area {
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: rgba(26,10,18,0.95);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .chat-input-wrap {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      display: flex;
+      align-items: flex-end;
+      padding: 8px 14px;
+      transition: border-color 0.3s;
+    }
+
+    .chat-input-wrap:focus-within { border-color: var(--gold); }
+
+    .chat-input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.5;
+    }
+
+    .chat-input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .chat-attach-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 1.2rem;
+      transition: color 0.2s;
+    }
+
+    .chat-attach-btn:hover { color: var(--gold); }
+
+    .chat-send-btn {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold), #E8D5A3);
+      border: none; border-radius: 14px;
+      color: #1a0a12;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .chat-send-btn:hover { transform: scale(1.05); }
+    .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Loading ── */
+    .chat-loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* ── Mobile Bottom Nav ── */
+    .mobile-bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(26,10,18,0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; padding: 8px 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      z-index: 1000;
+    }
+
+    .mbn-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+      color: rgba(255,255,255,0.4); font-size: 0.7rem;
+      padding: 8px; transition: color 0.2s;
+      text-decoration: none;
+    }
+
+    .mbn-item.active { color: var(--gold); }
+    .mbn-item:hover { color: rgba(255,255,255,0.8); }
+    .mbn-icon { width: 24px; height: 24px; }
+
+    .chat-page-wrap {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+    }
+
+    .msg-wrap.user .msg-bubble a { color: #1a0a12; }
+
+    /* ── Receipt Upload Modal ── */
+    .receipt-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px); z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .receipt-modal-overlay.hidden { display: none; }
+
+    .receipt-modal {
+      background: linear-gradient(180deg, #2d1020 0%, #1a0a12 100%);
+      border: 1px solid rgba(196,163,90,0.3);
+      border-radius: 24px; padding: 28px 24px;
+      width: 100%; max-width: 420px;
+      animation: fadeSlideUp 0.4s ease;
+    }
+
+    .receipt-modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; color: #fff; margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .receipt-modal p {
+      color: rgba(255,255,255,0.5); font-size: 0.88rem;
+      text-align: center; margin-bottom: 20px;
+    }
+
+    .receipt-preview {
+      width: 100%; height: 180px;
+      background: rgba(255,255,255,0.05);
+      border: 2px dashed rgba(196,163,90,0.3);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+      overflow: hidden; margin-bottom: 16px;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.88rem;
+      flex-direction: column; gap: 8px;
+    }
+
+    .receipt-preview:hover { border-color: var(--gold); }
+    .receipt-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+    .receipt-input-row {
+      display: flex; gap: 10px; margin-bottom: 12px;
+    }
+
+    .receipt-input {
+      flex: 1; padding: 12px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 12px; color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.92rem; outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .receipt-input:focus { border-color: var(--gold); }
+    .receipt-input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .receipt-submit {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      border: none; border-radius: 14px;
+      color: #fff; font-family: 'Tajawal', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s;
+    }
+
+    .receipt-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,211,102,0.3); }
+
+    .receipt-cancel {
+      width: 100%; padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px; color: rgba(255,255,255,0.5);
+      font-family: 'Tajawal', sans-serif; font-size: 0.92rem;
+      cursor: pointer; margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .receipt-cancel:hover { background: rgba(255,255,255,0.08); }
+
+    /* Unread badge */
+    .unread-badge {
+      position: absolute; top: -6px; right: -6px;
+      background: #e74c3c; color: #fff;
+      font-size: 0.65rem; min-width: 18px; height: 18px;
+      border-radius: 9px; display: flex; align-items: center;
+      justify-content: center; font-weight: 700;
+    }
+
+    .mbn-chat-item { position: relative; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-page-wrap">
+    <div class="chat-header">
+      <a href="account.html" class="back-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <div class="chat-avatar-lg">💬</div>
+      <div class="chat-header-title">Beauty Zone</div>
+      <div class="chat-header-sub">فريق خدمة العملاء</div>
+    </div>
+
+    <div id="order-info-bar" class="order-info-bar" style="display:none">
+      <div>
+        <div class="oib-order">طلب <strong id="oib-order-id"></strong></div>
+        <div class="oib-status" id="oib-status"></div>
+      </div>
+      <div class="oib-amount" id="oib-amount"></div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-loading">
+        <div style="font-size:2rem;margin-bottom:12px">⏳</div>
+        <p>جاري تحميل المحادثة...</p>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="msg-input" rows="1" placeholder="اكيبي رسالتك هنا..." oninput="autoResize(this)"></textarea>
+        <button class="chat-attach-btn" onclick="openReceiptModal()" title="إرسال إشعار دفع">📎</button>
+      </div>
+      <button class="chat-send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- Receipt Upload Modal -->
+  <div class="receipt-modal-overlay hidden" id="receipt-modal" onclick="if(event.target===this)closeReceiptModal()">
+    <div class="receipt-modal">
+      <h3>📤 إرسال إشعار التحويل</h3>
+      <p>ارفعي صورة إشعار التحويل أو أدخلي رقم المرجع</p>
+
+      <div class="receipt-preview" id="receipt-preview" onclick="document.getElementById('receipt-file').click()">
+        <span id="receipt-placeholder">📷 اضغطي لرفع صورة الإشعار</span>
+        <img id="receipt-img" style="display:none" alt="إشعار"/>
+      </div>
+      <input type="file" id="receipt-file" accept="image/*" style="display:none" onchange="previewReceipt(this)"/>
+
+      <div class="receipt-input-row">
+        <input type="number" class="receipt-input" id="receipt-amount" placeholder="المبلغ المحوّل (₪)" />
+        <input type="text" class="receipt-input" id="receipt-ref" placeholder="رقم المرجع (اختياري)" />
+      </div>
+
+      <button class="receipt-submit" onclick="submitReceipt()">إرسال إشعار الدفع ✓</button>
+      <button class="receipt-cancel" onclick="closeReceiptModal()">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- Hidden file input for chat images -->
+  <input type="file" id="chat-image-input" accept="image/*" style="display:none" onchange="handleChatImage(this)"/>
+
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="mbn-item">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="mbn-label">الرئيسية</span>
+    </a>
+    <a href="search.html" class="mbn-item">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="mbn-label">بحث</span>
+    </a>
+    <a href="cart.html" class="mbn-item">
+      <div style="position:relative">
+        <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        <span id="mbn-cart-badge" style="display:none" class="unread-badge">0</span>
+      </div>
+      <span class="mbn-label">السلة</span>
+    </a>
+    <a href="wishlist.html" class="mbn-item">
+      <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="mbn-label">المفضلة</span>
+    </a>
+    <div class="mbn-chat-item mbn-item active" style="flex-direction:column;align-items:center;gap:2px" onclick="window.location.href='chat.html'">
+      <div style="position:relative">
+        <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="mbn-chat-badge" class="unread-badge" style="display:none;background:#25D366">0</span>
+      </div>
+      <span class="mbn-label">شات</span>
+    </div>
+  </nav>
+
+  <script src="js/api.js"></script>
+  <script src="js/glow-data.js"></script>
+  <script src="js/glow-main.js"></script>
+  <script>
+    // ── State ──
+    let _currentConv = null;
+    let _currentOrder = null;
+    let _accounts = [];
+    let _pendingImageData = null;
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', async () => {
+      updateCartBadge();
+
+      // Check login
+      let user = null;
+      try { user = await API.getMe(); } catch(e) {}
+      if (!user) { window.location.href = 'login.html?redirect=chat.html'; return; }
+
+      // Get payment accounts
+      try { _accounts = await API.getPaymentAccounts(); } catch(e) {}
+
+      // Find or create conversation for latest order
+      await initChat();
+    });
+
+    async function initChat() {
+      // Get user's conversations
+      let convs = [];
+      try { convs = await API.getMyConversations(); } catch(e) {}
+
+      if (convs.length > 0) {
+        // Use most recent conversation
+        _currentConv = convs[0];
+        if (_currentConv.order_id) {
+          try {
+            const orders = await API.getOrders();
+            _currentOrder = orders.find(o => o.id === _currentConv.order_id);
+          } catch(e) {}
+        }
+      }
+
+      // Show order info bar
+      if (_currentConv && _currentOrder) {
+        document.getElementById('order-info-bar').style.display = 'flex';
+        document.getElementById('oib-order-id').textContent = '#' + (_currentConv.order_id || '').slice(-6).toUpperCase();
+        document.getElementById('oib-amount').textContent = (_currentOrder.total || 0) + ' ₪';
+        const statusEl = document.getElementById('oib-status');
+        statusEl.textContent = getStatusLabel(_currentOrder.status);
+        statusEl.className = 'oib-status ' + getStatusClass(_currentOrder.status);
+      }
+
+      // Load messages
+      await loadMessages();
+
+      // Update unread badge
+      try {
+        const { count } = await API.getUnreadCount();
+        updateChatBadge(count);
+      } catch(e) {}
+
+      // Mark as read
+      if (_currentConv) {
+        try { await API.markConversationRead(_currentConv.id); } catch(e) {}
+      }
+    }
+
+    async function loadMessages() {
+      const container = document.getElementById('chat-messages');
+      if (!_currentConv) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4)">
+            <div style="font-size:3rem;margin-bottom:12px">💬</div>
+            <p>ما في محادثات سابقة</p>
+            <p style="font-size:0.85rem;margin-top:8px">أكيد طلبك أولاً من صفحة السلة</p>
+          </div>`;
+        return;
+      }
+
+      let messages = [];
+      try {
+        messages = await API.getConversationMessages(_currentConv.id);
+        await API.markConversationRead(_currentConv.id);
+      } catch(e) { messages = []; }
+
+      if (!messages.length) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4)">
+            <div style="font-size:3rem;margin-bottom:12px">💬</div>
+            <p>ابدئي محادثة مع الفريق</p>
+            <p style="font-size:0.85rem;margin-top:8px">رسالتك الأولى ستصلنا مباشرة</p>
+          </div>`;
+        return;
+      }
+
+      renderMessages(messages);
+    }
+
+    function renderMessages(messages) {
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = messages.map(m => buildMessageHTML(m)).join('');
+
+      // Auto-scroll to bottom
+      setTimeout(() => {
+        container.scrollTop = container.scrollHeight;
+      }, 100);
+    }
+
+    function buildMessageHTML(m) {
+      const time = new Date(m.created_at).toLocaleTimeString('ar-IL', { hour: '2-digit', minute: '2-digit' });
+
+      if (m.message_type === 'receipt') {
+        return `
+          <div class="msg-wrap ${m.sender}">
+            <div class="msg-bubble">
+              <div class="msg-receipt">
+                ${m.image_url ? `<img src="${m.image_url}" class="msg-receipt-img" alt="إشعار" onclick="window.open('${m.image_url}','_blank')" />` : ''}
+                <div class="msg-receipt-label">إشعار تحويل</div>
+                <div class="msg-receipt-amount">${(m.amount || 0).toFixed(2)} ₪</div>
+                ${m.reference ? `<div class="msg-receipt-ref">المرجع: ${m.reference}</div>` : ''}
+              </div>
+            </div>
+            <div class="msg-time">${time}</div>
+          </div>`;
+      }
+
+      if (m.message_type === 'system') {
+        return `
+          <div class="msg-wrap system">
+            <div class="msg-bubble">${m.message}</div>
+          </div>`;
+      }
+
+      return `
+        <div class="msg-wrap ${m.sender}">
+          <div class="msg-bubble">${escapeHtml(m.message)}</div>
+          <div class="msg-time">${time}</div>
+        </div>`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ── Send Message ──
+    async function sendMessage() {
+      const input = document.getElementById('msg-input');
+      const text = input.value.trim();
+      if (!text || !_currentConv) return;
+
+      input.value = '';
+      input.style.height = 'auto';
+
+      // Optimistic UI
+      const container = document.getElementById('chat-messages');
+      const tempId = 'temp-' + Date.now();
+      container.innerHTML += buildMessageHTML({
+        id: tempId, sender: 'user', message: text,
+        message_type: 'text', created_at: new Date().toISOString()
+      });
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        await API.sendChatMessage(_currentConv.id, { message: text, message_type: 'text' });
+        await loadMessages();
+      } catch(e) {
+        document.getElementById('chat-messages').innerHTML += `
+          <div style="text-align:center;padding:8px;color:#e74c3c;font-size:0.85rem">فشل إرسال الرسالة. حاول مرة أخرى.</div>`;
+      }
+    }
+
+    // Enter to send
+    document.getElementById('msg-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // ── Receipt Modal ──
+    function openReceiptModal() {
+      document.getElementById('receipt-modal').classList.remove('hidden');
+      document.getElementById('receipt-amount').value = _currentOrder ? (_currentOrder.total || '') : '';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receipt-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+      _pendingImageData = null;
+      document.getElementById('receipt-img').style.display = 'none';
+      document.getElementById('receipt-placeholder').style.display = '';
+      document.getElementById('receipt-file').value = '';
+    }
+
+    function previewReceipt(input) {
+      if (!input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.getElementById('receipt-img');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('receipt-placeholder').style.display = 'none';
+        _pendingImageData = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    async function submitReceipt() {
+      const amount = document.getElementById('receipt-amount').value.trim();
+      const reference = document.getElementById('receipt-ref').value.trim();
+
+      if (!amount) { alert('أدخلي المبلغ المحوّل'); return; }
+
+      let imageUrl = null;
+      if (_pendingImageData) {
+        try {
+          const uploadRes = await API.uploadFile(dataURLtoBlob(_pendingImageData), 'receipt');
+          imageUrl = uploadRes.url || uploadRes.path;
+        } catch(e) {
+          imageUrl = _pendingImageData;
+        }
+      }
+
+      const receiptMsg = `📤 إشعار تحويل\n💵 المبلغ: ${amount} ₪${reference ? `\n🔢 المرجع: ${reference}` : ''}`;
+
+      try {
+        await API.sendChatMessage(_currentConv.id, {
+          message: receiptMsg,
+          message_type: 'receipt',
+          image_url: imageUrl
+        });
+
+        // Also submit as payment notification
+        try {
+          await API.submitPaymentNotification({
+            order_id: _currentConv.order_id,
+            account_id: null,
+            amount: parseFloat(amount),
+            reference,
+            image_url: imageUrl
+          });
+        } catch(e) {}
+
+        closeReceiptModal();
+        await loadMessages();
+      } catch(e) {
+        alert('فشل إرسال الإشعار. حاول مرة أخرى.');
+      }
+    }
+
+    function dataURLtoBlob(dataurl) {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
+      return new Blob([u8arr], { type: mime });
+    }
+
+    // ── Helpers ──
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    function getStatusLabel(status) {
+      const labels = { 'جديد': 'جديد', 'قيد التجهيز': 'قيد التجهيز', 'تم الشحن': 'تم الشحن', 'مكتمل': 'مكتمل', 'ملغي': 'ملغي' };
+      return labels[status] || status || 'جديد';
+    }
+
+    function getStatusClass(status) {
+      const map = { 'جديد': 'pending', 'قيد التجهيز': 'pending', 'تم الشحن': 'confirmed', 'مكتمل': 'confirmed', 'ملغي': 'rejected' };
+      return map[status] || 'pending';
+    }
+
+    async function updateCartBadge() {
+      try {
+        const cart = await API.getCart();
+        const count = cart.reduce((s, c) => s + (c.qty || 1), 0);
+        const badge = document.getElementById('mbn-cart-badge');
+        if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
+      } catch(e) {}
+    }
+
+    function updateChatBadge(count) {
+      const badge = document.getElementById('mbn-chat-badge');
+      if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
+    }
+  </script>
+</body>
+</html>

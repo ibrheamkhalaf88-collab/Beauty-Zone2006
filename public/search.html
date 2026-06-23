@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>بحث — Beauty Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/glow.css"/>
+  <link rel="stylesheet" href="css/luxury.css"/>
+  <link rel="stylesheet" href="css/upgrades.css"/>
+  <style>
+    .page-content{padding:100px 16px 120px;max-width:1200px;margin:0 auto}
+    .page-title{font-family:'Playfair Display',serif;font-size:2.5rem;text-align:center;margin-bottom:30px;color:var(--deep-text)}
+    .search-wrap{max-width:800px;margin:0 auto 30px}
+    .search-input{width:100%;padding:16px 24px;border:2px solid #e8e0d8;border-radius:50px;font-size:1.1rem;transition:border-color .3s,box-shadow .3s;background:#fff}
+    .search-input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(123,45,139,.12);outline:none}
+    .search-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+    @media(max-width:768px){.search-results{grid-template-columns:1fr 1fr}}
+    .search-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:transform .3s,box-shadow .3s;animation:fadeSlideUp .4s ease forwards;opacity:0}
+    .search-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,.1)}
+    .search-img{width:100%;height:180px;object-fit:cover}
+    .search-body{padding:14px}
+    .search-name{font-weight:700;font-size:.95rem;margin-bottom:4px}
+    .search-price{color:var(--accent-gold);font-weight:700}
+    .no-results{text-align:center;padding:60px 20px;color:var(--text-mid)}
+    @keyframes fadeSlideUp{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body class="glow-body">
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Beauty Zone</a>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="index.html" class="btn btn-ghost btn-sm">🏠 الرئيسية</a>
+    </div>
+  </nav>
+  <div class="page-content">
+    <h1 class="page-title">🔍 بحث</h1>
+    <div class="search-wrap">
+      <input type="search" id="searchInput" class="search-input" placeholder="ابحثي عن منتج، فئة، أو رقم SKU..." autofocus/>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+  </div>
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <a href="index.html" class="mbn-item" data-tab="home"><svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="mbn-label">الرئيسية</span></a>
+    <a href="search.html" class="mbn-item active" data-tab="search"><svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="mbn-label">بحث</span></a>
+    <a href="cart.html" class="mbn-item" data-tab="cart"><div class="mbn-cart-bubble"><svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg><span class="mbn-badge" id="mbn-cart-badge">0</span></div><span class="mbn-label">السلة</span></a>
+    <a href="wishlist.html" class="mbn-item" data-tab="wishlist"><svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="mbn-label">المفضلة</span></a>
+    <a href="account.html" class="mbn-item" data-tab="profile"><svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="mbn-label">حسابي</span></a>
+  </nav>
+  <script src="js/api.js"></script>
+  <script src="js/glow-data.js"></script>
+  <script src="js/glow-main.js"></script>
+  <script>
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function doSearch(q){
+      var products = (typeof DB !== 'undefined' && DB.getProducts) ? DB.getProducts() : [];
+      var out = document.getElementById('searchResults');
+      if (!q.trim()) { out.innerHTML = ''; return; }
+      var terms = q.toLowerCase().split(/\s+/);
+      var matches = products.filter(function(p){
+        var text = ((p.nameAR||'') + ' ' + (p.nameEN||'') + ' ' + (p.sku||'') + ' ' + (window.CAT_LABELS ? CAT_LABELS[p.category]||'' : '')).toLowerCase();
+        return terms.every(function(t){ return text.includes(t); });
+      });
+      if (!matches.length) { out.innerHTML = '<div class="no-results">😔 لا توجد نتائج لـ "' + esc(q) + '"</div>'; return; }
+      out.innerHTML = matches.map(function(p,i){
+        var img = (p.images && p.images[0]) ? p.images[0] : 'assets/test-product.jpeg';
+        return '<a href="index.html?product=' + esc(p.id) + '" class="search-card" style="animation-delay:' + (i*0.06) + 's"><img src="' + img + '" class="search-img" onerror="this.onerror=null;this.src=\'assets/test-product.jpeg\'" /><div class="search-body"><div class="search-name">' + esc(p.nameAR||'') + '</div><div class="search-price">' + (p.price||'') + ' ₪</div></div></a>';
+      }).join('');
+    }
+    var el = document.getElementById('searchInput');
+    el.addEventListener('input', function(e){ doSearch(e.target.value); });
+    if (el.value) doSearch(el.value);
+  </script>
+</body>
+</html>
