@@ -2,19 +2,27 @@ require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const { initDB, seedIfEmpty, seedPaymentAccounts } = require('./database');
 
 async function main() {
+  // Ensure uploads directory exists
+  const uploadsDir = path.join(__dirname, 'uploads');
+  ['images', 'videos', 'temp'].forEach(sub => {
+    const dir = path.join(uploadsDir, sub);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  });
+
   await initDB();
   await seedIfEmpty();
   await seedPaymentAccounts();
 
   const app = express();
   const PORT = process.env.PORT || 3001;
-  const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3001';
+  const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
 
   app.use(cors({
-    origin: ALLOWED_ORIGIN,
+    origin: ALLOWED_ORIGIN === '*' ? true : ALLOWED_ORIGIN,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-Id']

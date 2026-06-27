@@ -22,8 +22,6 @@ async function initDB() {
     _db = new SQL.Database();
   }
 
-  _db.run('PRAGMA journal_mode=WAL');
-
   _db.run(`CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT NOT NULL, phone TEXT UNIQUE NOT NULL, email TEXT, password_hash TEXT NOT NULL, role TEXT DEFAULT 'customer', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`);
   _db.run(`CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY, sku TEXT, name_ar TEXT NOT NULL, name_en TEXT, price REAL NOT NULL, category TEXT NOT NULL, description_ar TEXT, stock INTEGER DEFAULT 0, featured INTEGER DEFAULT 0, bestseller INTEGER DEFAULT 0, images TEXT DEFAULT '[]', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`);
   _db.run(`CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, user_id TEXT, customer_name TEXT, customer_phone TEXT, customer_address TEXT, items TEXT NOT NULL, total REAL NOT NULL, status TEXT DEFAULT 'جديد', notes TEXT, created_at TEXT DEFAULT (datetime('now')))`);

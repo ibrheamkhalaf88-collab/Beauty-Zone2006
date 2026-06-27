@@ -2,7 +2,9 @@
    BEAUTY ZONE API Client — replaces localStorage
    ════════════════════════════════════════════════ */
 
-const API_BASE = `http://${window.location.hostname}:${window.location.port || '3001'}`;
+const API_BASE = window.location.port 
+  ? `http://${window.location.hostname}:${window.location.port}`
+  : window.location.origin;
 
 const API = {
 
