@@ -66,20 +66,31 @@ function dbGet(sql, params = []) {
   return rows.length > 0 ? rows[0] : null;
 }
 
+// ── Reset Database (drop all + recreate) ────────
+async function resetDB() {
+  if (!_db) throw new Error('DB not initialized');
+  const tables = ['users','products','orders','testimonials','cart','settings','wishlist','payment_accounts','conversations','chat_messages','payment_notifications'];
+  for (const t of tables) _db.run(`DROP TABLE IF EXISTS ${t}`);
+  await initDB();
+  await seedIfEmpty();
+  await seedPaymentAccounts();
+  console.log('🔄 Database reset complete');
+}
+
 async function seedIfEmpty() {
   const row = dbGet('SELECT COUNT(*) as count FROM products');
   if (row && row.count > 0) return;
 
   const products = [
     ['skincare-001', 'BZ-001', 'ميلانوفري - كريم تفتيح الجلد 30جم', 'Melanofree Topical Cream 30gm', 58, 'skincare', 'كريم موضعي لمعالجة التصبغات والبقع الداكنة. تركيبة طبية فعّالة وآمنة. 30 جرام.', 25, 1, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.56.jpeg"]'],
-    ['skincare-002', 'BZ-002', 'ميلانو صابون التبييض - أربوتين وحمض الكوجيك', 'Melano Soap Whitening - Arbutin & Kojic Acid', 32, 'skincare', 'صابون تبييض بتركيبة متطورة من الأربوتين وحمض الكوجيك مع توت العليق وفيتامين C. مناسب لجميع أنواع البشرة.', 40, 0, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57.jpeg"]'],
+    ['skincare-002', 'BZ-002', 'ميلانو صابون التبييض - أربوتين وحمض الكوجيك', 'Melano Soap Whitening - Arbutin & Kojic Acid', 32, 'skincare', 'صابون تبييض بتركيبة متطورة من الأربوتين وحمض الكوجيك مع توت العليق وفيتامين C.', 40, 0, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57.jpeg"]'],
     ['skincare-003', 'BZ-003', 'كريم الفوت للسرو - العناية بالقدمين', 'Foot Care Cream - Al Maiky', 45, 'skincare', 'كريم طبيعي مُغذّي للقدمين بخلاصة نباتات فاخرة. يُرطّب ويُنعّم الجلد المتشقق.', 18, 1, 0, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57__1_.jpeg"]'],
-    ['personal-001', 'BZ-004', 'ميلانو ميلو بلي - جل مرطّب للعناية - توت العليق', 'Melano Melo Ply - Lubricant Gel - Raspberry', 38, 'personal', 'جل مرطّب للعناية الشخصية بنكهة توت العليق. قاعدة مائية آمنة.', 30, 1, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57__2_.jpeg"]'],
-    ['personal-002', 'BZ-005', 'ميلانو ميلو بلي - جل مرطّب للعناية - شوكولاتة', 'Melano Melo Ply - Lubricant Gel - Chocolate', 38, 'personal', 'جل مرطّب للعناية الشخصية بنكهة الشوكولاتة. قاعدة مائية آمنة.', 28, 0, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57__3_.jpeg"]'],
-    ['personal-003', 'BZ-006', 'ميلانو ميلو بلي - جل مرطّب للعناية - موز', 'Melano Melo Ply - Lubricant Gel - Banana', 38, 'personal', 'جل مرطّب للعناية الشخصية بنكهة الموز. قاعدة مائية آمنة.', 22, 0, 0, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57__5_.jpeg"]'],
-    ['makeup-001', 'BZ-007', 'مجموعة نيفيا - مزيل العرق فريش ناتشورال', 'NIVEA Fresh Natural Deodorant Spray', 22, 'makeup', 'مزيل عرق نيفيا فريش ناتشورال بدون ألومنيوم 0%. حماية 48 ساعة.', 50, 0, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.58.jpeg"]'],
-    ['makeup-002', 'BZ-008', 'نيفيا بلاك & وايت إنفيزيبل - مزيل عرق', 'NIVEA Black & White Invisible Deodorant', 25, 'makeup', 'مزيل عرق نيفيا بلاك وايت إنفيزيبل. حماية 72 ساعة.', 35, 1, 0, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.58__1_.jpeg"]'],
-    ['vitamins-001', 'BZ-009', 'كبسولات الكولاجين البحري المتوهج', 'Marine Collagen Glow Capsules', 195, 'vitamins', 'كولاجين بحري نقي يُعزز مرونة البشرة ويُقوّي الأظافر والشعر. 60 كبسولة.', 20, 1, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.58__4_.jpeg"]'],
+    ['personal-001', 'BZ-004', 'ميلانو ميلو بلي - جل مرطّب - توت العليق', 'Melano Melo Ply - Gel - Raspberry', 38, 'personal', 'جل مرطّب للعناية الشخصية بنكهة توت العليق. قاعدة مائية آمنة.', 30, 1, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57__2_.jpeg"]'],
+    ['personal-002', 'BZ-005', 'ميلانو ميلو بلي - جل مرطّب - شوكولاتة', 'Melano Melo Ply - Gel - Chocolate', 38, 'personal', 'جل مرطّب للعناية الشخصية بنكهة الشوكولاتة. قاعدة مائية آمنة.', 28, 0, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57__3_.jpeg"]'],
+    ['personal-003', 'BZ-006', 'ميلانو ميلو بلي - جل مرطّب - موز', 'Melano Melo Ply - Gel - Banana', 38, 'personal', 'جل مرطّب للعناية الشخصية بنكهة الموز. قاعدة مائية آمنة.', 22, 0, 0, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.57__5_.jpeg"]'],
+    ['makeup-001', 'BZ-007', 'نيفيا فريش ناتشورال - مزيل عرق', 'NIVEA Fresh Natural Deodorant', 22, 'makeup', 'مزيل عرق نيفيا فريش ناتشورال بدون ألومنيوم. حماية 48 ساعة.', 50, 0, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.58.jpeg"]'],
+    ['makeup-002', 'BZ-008', 'نيفيا بلاك & وايت - مزيل عرق', 'NIVEA Black & White Deodorant', 25, 'makeup', 'مزيل عرق نيفيا بلاك وايت إنفيزيبل. حماية 72 ساعة.', 35, 1, 0, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.58__1_.jpeg"]'],
+    ['vitamins-001', 'BZ-009', 'كبسولات الكولاجين البحري', 'Marine Collagen Capsules', 195, 'vitamins', 'كولاجين بحري نقي يُعزز مرونة البشرة ويُقوّي الأظافر والشعر. 60 كبسولة.', 20, 1, 1, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.58__4_.jpeg"]'],
     ['vitamins-002', 'BZ-010', 'فيتامين D3 + K2 المتكامل', 'Vitamin D3 + K2 Complex', 135, 'vitamins', 'تركيبة متطورة من D3 وK2 لصحة العظام والمناعة والجمال.', 40, 0, 0, '["/assets/WhatsApp_Image_2026-03-16_at_14.03.58__5_.jpeg"]']
   ];
 
@@ -88,13 +99,23 @@ async function seedIfEmpty() {
   const adminHash = bcrypt.hashSync('admin123', 10);
   _db.run("INSERT OR IGNORE INTO users (id, name, phone, email, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)", ['admin-001', 'المدير', 'admin', 'admin@beautyzone.ps', adminHash, 'admin']);
 
-  for (const t of [['t1','كريم ميلانوفري غيّر بشرتي! بعد أسبوعين صار لوني أفتح وأصفى.','سارة الأحمد','رام الله',5,'س'],['t2','صابون ميلانو رائع جداً، جربته لأول مرة وما شاء الله فرق واضح.','نور محمد','نابلس',5,'ن'],['t3','منتجات Beauty Zone أصلية 100٪ والتوصيل سريع جداً.','ريم سالم','الخليل',5,'ر'],['t4','اشتريت مزيل نيفيا وهو أفضل شي استخدمته. حماية طول اليوم.','هنا العمري','بيت لحم',5,'ه'],['t5','من أفضل متاجر الكوزمتكس. الخدمة ممتازة والمنتجات أصلية.','دانا حسين','القدس',5,'د'],['t6','كريم القدمين تحفة! رجعت بشرتي ناعمة من أول استخدام.','لمى يوسف','جنين',5,'ل']]) {
-    _db.run('INSERT INTO testimonials (id, text, name, location, stars, letter) VALUES (?, ?, ?, ?, ?, ?)', t);
-  }
+  const testimonials = [
+    ['t1', 'كريم ميلانوفري غيّر بشرتي! بعد أسبوعين صار لوني أفتح وأصفى.', 'سارة الأحمد', 'رام الله', 5, 'س'],
+    ['t2', 'صابون ميلانو رائع جداً، جربته لأول مرة وما شاء الله فرق واضح.', 'نور محمد', 'نابلس', 5, 'ن'],
+    ['t3', 'منتجات Beauty Zone أصلية 100٪ والتوصيل سريع جداً.', 'ريم سالم', 'الخليل', 5, 'ر'],
+    ['t4', 'اشتريت مزيل نيفيا وهو أفضل شي استخدمته. حماية طول اليوم.', 'هنا العمري', 'بيت لحم', 5, 'ه'],
+    ['t5', 'من أفضل متاجر الكوزمتكس. الخدمة ممتازة والمنتجات أصلية.', 'دانا حسين', 'القدس', 5, 'د'],
+    ['t6', 'كريم القدمين تحفة! رجعت بشرتي ناعمة من أول استخدام.', 'لمى يوسف', 'جنين', 5, 'ل']
+  ];
+  for (const t of testimonials) _db.run('INSERT INTO testimonials (id, text, name, location, stars, letter) VALUES (?, ?, ?, ?, ?, ?)', t);
 
-  for (const s of [['announcement','✨ شحن مجاني للطلبات فوق 200 ₪ ✨ | 🌟 خصم 15% على أول طلب بـ كود: BZ15 🌟'],['whatsapp','972500000000'],['store_name','Beauty Zone'],['store_name_ar','بيوتي زون']]) {
-    _db.run('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)', s);
-  }
+  const settings = [
+    ['announcement', '✨ شحن مجاني للطلبات فوق 200 ₪ ✨ | 🌟 خصم 15% على أول طلب بـ كود: BZ15 🌟'],
+    ['whatsapp', '972500000000'],
+    ['store_name', 'Beauty Zone'],
+    ['store_name_ar', 'بيوتي زون']
+  ];
+  for (const s of settings) _db.run('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)', s);
 
   saveDB();
   console.log('✅ Database seeded');
@@ -111,4 +132,4 @@ async function seedPaymentAccounts() {
   saveDB();
 }
 
-module.exports = { initDB, getDBSync, dbQuery, dbGet, saveDB, seedIfEmpty, seedPaymentAccounts };
+module.exports = { initDB, getDBSync, dbQuery, dbGet, saveDB, seedIfEmpty, seedPaymentAccounts, resetDB };

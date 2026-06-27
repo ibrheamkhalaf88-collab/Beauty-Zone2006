@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const { initDB, seedIfEmpty, seedPaymentAccounts } = require('./database');
+const { initDB, seedIfEmpty, seedPaymentAccounts, resetDB } = require('./database');
 
 async function main() {
   // Ensure uploads directory exists
@@ -68,6 +68,17 @@ async function main() {
   app.use('/api/upload', require('./routes/upload'));
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
+  // Reset database (for development)
+  app.post('/api/reset', async (req, res) => {
+    try {
+      await resetDB();
+      res.json({ status: 'ok', message: 'Database reset complete' });
+    } catch (e) {
+      console.error('Reset error:', e);
+      res.status(500).json({ error: 'Failed to reset database' });
+    }
+  });
 
   app.use((err, req, res, next) => {
     console.error('Error:', err);
