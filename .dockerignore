@@ -1,0 +1,14 @@
+node_modules
+server/node_modules
+server/beautyzone.db
+server/uploads/images/*
+server/uploads/videos/*
+server/uploads/temp/*
+.git
+.gitignore
+.env
+server/.env
+*.md
+_archive
+.opencode
+.vscode
